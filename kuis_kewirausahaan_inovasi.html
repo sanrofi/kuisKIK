@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kuis Kreativitas, Inovasi, dan Kewirausahaan</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- SortableJS untuk fitur Drag and Drop (Mengurutkan) -->
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+        .fade-in {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .sortable-ghost {
+            opacity: 0.4;
+            background-color: #e5e7eb;
+        }
+        .sortable-drag {
+            cursor: grabbing !important;
+        }
+        .handle {
+            cursor: grab;
+        }
+        /* Custom scrollbar for dropdowns */
+        select {
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            background-size: 1em;
+        }
+    </style>
+</head>
+<body class="text-gray-800 antialiased min-h-screen flex flex-col">
+
+    <main class="flex-grow flex items-center justify-center p-4 sm:p-6">
+        <div id="app-container" class="bg-white rounded-2xl shadow-xl w-full max-w-3xl overflow-hidden relative">
+            
+            <!-- START SCREEN -->
+            <div id="start-screen" class="p-8 md:p-12 text-center fade-in">
+                <div class="w-20 h-20 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                </div>
+                <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Kuis Wirausaha & Inovasi</h1>
+                <p class="text-gray-600 mb-8 max-w-lg mx-auto text-lg">
+                    Uji pengetahuanmu tentang kreativitas, inovasi, dan dunia kewirausahaan dengan 50 soal komprehensif (Pilihan Ganda, Mengurutkan, dan Menjodohkan).
+                </p>
+                <button onclick="startQuiz()" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-8 rounded-lg shadow-lg hover:shadow-xl transition duration-200 transform hover:-translate-y-1">
+                    Mulai Kuis Sekarang
+                </button>
+            </div>
+
+            <!-- QUIZ SCREEN -->
+            <div id="quiz-screen" class="hidden flex-col h-full fade-in">
+                <!-- Header -->
+                <div class="bg-gray-50 border-b border-gray-200 p-4 sm:p-6">
+                    <div class="flex justify-between items-center mb-2">
+                        <span id="question-counter" class="text-sm font-semibold text-gray-500 uppercase tracking-wider">Pertanyaan 1 / 50</span>
+                        <span class="text-sm font-medium text-blue-600 bg-blue-100 px-3 py-1 rounded-full" id="question-type-badge">Pilihan Ganda</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2.5">
+                        <div id="progress-bar" class="bg-blue-600 h-2.5 rounded-full transition-all duration-300" style="width: 2%"></div>
+                    </div>
+                </div>
+
+                <!-- Question Area -->
+                <div class="p-4 sm:p-6 flex-grow overflow-y-auto">
+                    <h2 id="question-text" class="text-xl md:text-2xl font-bold text-gray-800 mb-6">Teks Pertanyaan</h2>
+                    
+                    <!-- Dynamic Answer Container -->
+                    <div id="answer-container" class="space-y-3">
+                        <!-- Content will be injected here by JS -->
+                    </div>
+
+                    <!-- Error/Feedback Message -->
+                    <div id="feedback-msg" class="hidden mt-4 p-3 rounded-lg text-sm font-medium"></div>
+                </div>
+
+                <!-- Footer -->
+                <div class="bg-gray-50 border-t border-gray-200 p-4 sm:p-6 flex justify-end">
+                    <button id="next-btn" onclick="submitAnswer()" class="bg-gray-300 text-gray-500 font-semibold py-2.5 px-6 rounded-lg cursor-not-allowed transition duration-200">
+                        Selanjutnya
+                    </button>
+                </div>
+            </div>
+
+            <!-- RESULT SCREEN -->
+            <div id="result-screen" class="hidden p-8 md:p-12 text-center fade-in">
+                <div class="w-24 h-24 mx-auto mb-6 rounded-full flex items-center justify-center" id="result-icon">
+                    <!-- Icon injected by JS based on score -->
+                </div>
+                <h2 class="text-3xl font-bold text-gray-900 mb-2">Kuis Selesai!</h2>
+                <p class="text-gray-600 mb-6">Inilah hasil akhir dari pengerjaan kuis kamu.</p>
+                
+                <div class="bg-blue-50 border border-blue-100 rounded-xl p-6 mb-8 inline-block w-full max-w-sm">
+                    <div class="text-5xl font-extrabold text-blue-600 mb-2" id="final-score">100</div>
+                    <div class="text-sm text-blue-800 font-medium uppercase tracking-wide">Poin dari 100</div>
+                </div>
+
+                <div class="flex justify-center space-x-4">
+                    <button onclick="restartQuiz()" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-8 rounded-lg shadow transition duration-200">
+                        Coba Lagi
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        // Database 50 Pertanyaan
+        const questionBank = [
+            // --- BAGIAN 1: PILIHAN GANDA (1-30) ---
+            { type: 'mcq', question: "Apa definisi paling tepat dari inovasi?", options: ["Menemukan ide baru yang belum pernah ada", "Mengimplementasikan ide kreatif menjadi sesuatu yang bernilai", "Menjual produk dengan harga murah", "Meniru produk pesaing"], answer: "Mengimplementasikan ide kreatif menjadi sesuatu yang bernilai" },
+            { type: 'mcq', question: "Kreativitas adalah kemampuan untuk...", options: ["Mengambil risiko bisnis", "Menghasilkan ide-ide baru dan unik", "Menganalisis laporan keuangan", "Memimpin tim kerja"], answer: "Menghasilkan ide-ide baru dan unik" },
+            { type: 'mcq', question: "Seorang wirausahawan (entrepreneur) sejati memiliki karakteristik utama berupa...", options: ["Takut mengambil risiko", "Berani mengambil risiko yang terukur", "Selalu menghindari persaingan", "Mengandalkan modal dari pemerintah"], answer: "Berani mengambil risiko yang terukur" },
+            { type: 'mcq', question: "Tahapan pertama dalam Design Thinking adalah...", options: ["Ideate", "Prototype", "Empathize", "Test"], answer: "Empathize" },
+            { type: 'mcq', question: "Inovasi yang menciptakan pasar baru dan merusak pasar yang sudah ada disebut...", options: ["Inovasi Inkremental", "Inovasi Disruptif", "Inovasi Radikal", "Inovasi Arsitektural"], answer: "Inovasi Disruptif" },
+            { type: 'mcq', question: "Apa kepanjangan dari SWOT dalam analisis bisnis?", options: ["Strengths, Weaknesses, Opportunities, Threats", "Sales, Wealth, Output, Taxes", "System, Work, Organization, Team", "Strategy, Winning, Objectives, Targets"], answer: "Strengths, Weaknesses, Opportunities, Threats" },
+            { type: 'mcq', question: "Modal awal yang diberikan oleh investor individu yang kaya untuk startup disebut...", options: ["Venture Capital", "Angel Investment", "Crowdfunding", "Bank Loan"], answer: "Angel Investment" },
+            { type: 'mcq', question: "Minimum Viable Product (MVP) bertujuan untuk...", options: ["Membuat produk semahal mungkin", "Menguji hipotesis bisnis dengan fitur dasar", "Menghabiskan anggaran riset", "Menunda peluncuran produk"], answer: "Menguji hipotesis bisnis dengan fitur dasar" },
+            { type: 'mcq', question: "Metodologi Lean Startup sangat menekankan pada siklus...", options: ["Plan-Do-Check-Act", "Build-Measure-Learn", "Design-Develop-Deploy", "Research-Produce-Sell"], answer: "Build-Measure-Learn" },
+            { type: 'mcq', question: "Kekayaan Intelektual yang melindungi penemuan atau invensi disebut...", options: ["Hak Cipta", "Merek Dagang", "Paten", "Rahasia Dagang"], answer: "Paten" },
+            { type: 'mcq', question: "Perusahaan seperti Gojek dan Grab merupakan contoh model bisnis...", options: ["B2B (Business to Business)", "B2C (Business to Consumer)", "Peer-to-Peer / Platform Multilateral", "C2C (Consumer to Consumer)"], answer: "Peer-to-Peer / Platform Multilateral" },
+            { type: 'mcq', question: "Titik di mana total pendapatan sama dengan total biaya disebut...", options: ["Return on Investment", "Break Even Point (BEP)", "Profit Margin", "Cash Flow"], answer: "Break Even Point (BEP)" },
+            { type: 'mcq', question: "Value Proposition dalam Business Model Canvas (BMC) menjelaskan tentang...", options: ["Siapa target pasar kita", "Nilai atau solusi yang kita tawarkan ke pelanggan", "Cara kita mendapatkan keuntungan", "Mitra kerja utama kita"], answer: "Nilai atau solusi yang kita tawarkan ke pelanggan" },
+            { type: 'mcq', question: "Mencari dana dari masyarakat luas secara online disebut...", options: ["Bootstrapping", "Crowdfunding", "Series A Funding", "IPO"], answer: "Crowdfunding" },
+            { type: 'mcq', question: "Mana yang BUKAN merupakan elemen dari Business Model Canvas?", options: ["Customer Segments", "Key Activities", "Employee Salary", "Revenue Streams"], answer: "Employee Salary" },
+            { type: 'mcq', question: "Pivot dalam istilah startup berarti...", options: ["Menutup bisnis", "Mengubah arah strategi bisnis berdasarkan feedback", "Merekrut CEO baru", "Memperluas kantor"], answer: "Mengubah arah strategi bisnis berdasarkan feedback" },
+            { type: 'mcq', question: "Inovasi inkremental adalah inovasi yang...", options: ["Mengubah dunia sepenuhnya", "Meningkatkan produk atau layanan yang sudah ada secara bertahap", "Gagal di pasar", "Hanya dilakukan oleh perusahaan besar"], answer: "Meningkatkan produk atau layanan yang sudah ada secara bertahap" },
+            { type: 'mcq', question: "Proses mengumpulkan ide-ide tanpa mengkritiknya terlebih dahulu disebut...", options: ["Mind mapping", "Brainstorming", "Prototyping", "Pitching"], answer: "Brainstorming" },
+            { type: 'mcq', question: "B2B adalah singkatan dari...", options: ["Business to Bank", "Business to Business", "Back to Business", "Brand to Brand"], answer: "Business to Business" },
+            { type: 'mcq', question: "Jika sebuah bisnis menggunakan modal dari tabungan pribadi pendirinya tanpa pinjaman luar, disebut...", options: ["Venture Capital", "Bootstrapping", "Crowdsourcing", "Outsourcing"], answer: "Bootstrapping" },
+            { type: 'mcq', question: "Pitch Deck biasanya digunakan untuk presentasi kepada...", options: ["Pelanggan eceran", "Karyawan magang", "Investor", "Pemasok barang"], answer: "Investor" },
+            { type: 'mcq', question: "Perlindungan hukum untuk logo atau nama brand perusahaan adalah...", options: ["Paten", "Merek Dagang (Trademark)", "Hak Cipta (Copyright)", "Hak Desain Industri"], answer: "Merek Dagang (Trademark)" },
+            { type: 'mcq', question: "Blue Ocean Strategy (Strategi Samudra Biru) fokus pada...", options: ["Bersaing di pasar yang sudah jenuh", "Menciptakan ruang pasar baru yang belum ada pesaing", "Menurunkan harga secara drastis", "Membajak karyawan pesaing"], answer: "Menciptakan ruang pasar baru yang belum ada pesaing" },
+            { type: 'mcq', question: "Intrapreneurship adalah...", options: ["Kewirausahaan di dalam sebuah perusahaan yang sudah ada", "Menjual perusahaan ke pihak lain", "Kerjasama antara dua wirausahawan", "Berbisnis antar negara"], answer: "Kewirausahaan di dalam sebuah perusahaan yang sudah ada" },
+            { type: 'mcq', question: "Apa yang dimaksud dengan Skalabilitas (Scalability) dalam bisnis?", options: ["Kemampuan bisnis untuk tumbuh dan menangani peningkatan permintaan tanpa biaya membengkak", "Kemampuan bisnis untuk selalu untung setiap hari", "Kemampuan mengecilkan ukuran perusahaan", "Kemampuan meminjam uang dari bank"], answer: "Kemampuan bisnis untuk tumbuh dan menangani peningkatan permintaan tanpa biaya membengkak" },
+            { type: 'mcq', question: "Customer Acquisition Cost (CAC) mengukur...", options: ["Biaya untuk memproduksi satu barang", "Biaya yang dikeluarkan untuk mendapatkan satu pelanggan baru", "Gaji rata-rata karyawan", "Pajak tahunan perusahaan"], answer: "Biaya yang dikeluarkan untuk mendapatkan satu pelanggan baru" },
+            { type: 'mcq', question: "Metode pemecahan masalah yang berpusat pada manusia (human-centered) disebut...", options: ["Six Sigma", "Design Thinking", "Agile", "Waterfall"], answer: "Design Thinking" },
+            { type: 'mcq', question: "Kelemahan (Weakness) dalam analisis SWOT bersifat...", options: ["Faktor Eksternal", "Faktor Internal", "Faktor Global", "Faktor Pemerintah"], answer: "Faktor Internal" },
+            { type: 'mcq', question: "ROI (Return on Investment) digunakan untuk mengukur...", options: ["Jumlah karyawan", "Kepuasan pelanggan", "Efisiensi dan persentase keuntungan dari investasi", "Lama waktu produksi"], answer: "Efisiensi dan persentase keuntungan dari investasi" },
+            { type: 'mcq', question: "Apa tujuan utama dari riset pasar?", options: ["Menghabiskan dana perusahaan", "Memahami kebutuhan, preferensi, dan perilaku konsumen", "Mencari desain logo yang bagus", "Mendaftarkan izin usaha"], answer: "Memahami kebutuhan, preferensi, dan perilaku konsumen" },
+
+            // --- BAGIAN 2: MENGURUTKAN (31-40) ---
+            { type: 'order', question: "Urutkan 5 tahapan Design Thinking dari awal sampai akhir!", items: ["Ideate", "Test", "Define", "Empathize", "Prototype"], answer: ["Empathize", "Define", "Ideate", "Prototype", "Test"] },
+            { type: 'order', question: "Urutkan siklus metodologi Lean Startup!", items: ["Measure", "Build", "Learn"], answer: ["Build", "Measure", "Learn"] },
+            { type: 'order', question: "Urutkan Siklus Hidup Produk (Product Life Cycle) yang benar!", items: ["Maturity (Kedewasaan)", "Introduction (Perkenalan)", "Decline (Penurunan)", "Growth (Pertumbuhan)"], answer: ["Introduction (Perkenalan)", "Growth (Pertumbuhan)", "Maturity (Kedewasaan)", "Decline (Penurunan)"] },
+            { type: 'order', question: "Urutkan tahapan pendanaan startup dari yang paling awal!", items: ["Series A", "Pre-Seed / Bootstrapping", "IPO (Initial Public Offering)", "Seed Funding"], answer: ["Pre-Seed / Bootstrapping", "Seed Funding", "Series A", "IPO (Initial Public Offering)"] },
+            { type: 'order', question: "Urutkan langkah dasar memulai bisnis secara umum!", items: ["Meluncurkan Produk (Launch)", "Riset Pasar", "Membuat Business Plan", "Mencari Ide", "Mencari Modal"], answer: ["Mencari Ide", "Riset Pasar", "Membuat Business Plan", "Mencari Modal", "Meluncurkan Produk (Launch)"] },
+            { type: 'order', question: "Urutkan hierarki kebutuhan Maslow (dari dasar ke puncak) yang sering dipakai dalam riset konsumen!", items: ["Penghargaan (Esteem)", "Rasa Aman (Safety)", "Aktualisasi Diri", "Fisiologis (Makan/Minum)", "Sosial (Kasih Sayang)"], answer: ["Fisiologis (Makan/Minum)", "Rasa Aman (Safety)", "Sosial (Kasih Sayang)", "Penghargaan (Esteem)", "Aktualisasi Diri"] },
+            { type: 'order', question: "Urutkan proses Adopsi Inovasi (Rogers) dari kelompok yang paling pertama mengadopsi hingga terakhir!", items: ["Early Majority", "Innovators", "Laggards", "Early Adopters", "Late Majority"], answer: ["Innovators", "Early Adopters", "Early Majority", "Late Majority", "Laggards"] },
+            { type: 'order', question: "Urutkan proses penyusunan strategi pemasaran (STP)!", items: ["Positioning", "Segmentation", "Targeting"], answer: ["Segmentation", "Targeting", "Positioning"] },
+            { type: 'order', question: "Urutkan tahapan perkembangan tim (Tuckman's Stages) dalam membangun tim startup!", items: ["Performing", "Forming", "Norming", "Storming"], answer: ["Forming", "Storming", "Norming", "Performing"] },
+            { type: 'order', question: "Urutkan elemen funnel penjualan (AIDA model) dari atas ke bawah!", items: ["Action", "Desire", "Attention / Awareness", "Interest"], answer: ["Attention / Awareness", "Interest", "Desire", "Action"] },
+
+            // --- BAGIAN 3: MENJODOHKAN (41-50) ---
+            { type: 'match', question: "Jodohkan istilah Hak Kekayaan Intelektual berikut dengan definisinya!", 
+              left: ["Paten", "Hak Cipta", "Merek Dagang"], 
+              right: ["Melindungi invensi atau penemuan teknologi", "Melindungi karya seni, sastra, atau musik", "Melindungi logo, nama, atau simbol bisnis"], 
+              answer: {"Paten": "Melindungi invensi atau penemuan teknologi", "Hak Cipta": "Melindungi karya seni, sastra, atau musik", "Merek Dagang": "Melindungi logo, nama, atau simbol bisnis"} },
+            
+            { type: 'match', question: "Jodohkan istilah Keuangan Bisnis berikut!", 
+              left: ["Revenue", "Profit", "Cash Flow"], 
+              right: ["Total pendapatan kotor dari penjualan", "Keuntungan bersih setelah dikurangi biaya", "Aliran kas masuk dan keluar perusahaan"], 
+              answer: {"Revenue": "Total pendapatan kotor dari penjualan", "Profit": "Keuntungan bersih setelah dikurangi biaya", "Cash Flow": "Aliran kas masuk dan keluar perusahaan"} },
+
+            { type: 'match', question: "Jodohkan elemen Business Model Canvas (BMC) berikut!", 
+              left: ["Value Proposition", "Customer Segments", "Revenue Streams"], 
+              right: ["Nilai unik yang ditawarkan ke pelanggan", "Kelompok target pasar yang dilayani", "Cara bisnis menghasilkan uang"], 
+              answer: {"Value Proposition": "Nilai unik yang ditawarkan ke pelanggan", "Customer Segments": "Kelompok target pasar yang dilayani", "Revenue Streams": "Cara bisnis menghasilkan uang"} },
+
+            { type: 'match', question: "Jodohkan istilah jenis startup/perusahaan berikut!", 
+              left: ["Unicorn", "Decacorn", "Hectocorn"], 
+              right: ["Valuasi mencapai 1 Miliar USD", "Valuasi mencapai 10 Miliar USD", "Valuasi mencapai 100 Miliar USD"], 
+              answer: {"Unicorn": "Valuasi mencapai 1 Miliar USD", "Decacorn": "Valuasi mencapai 10 Miliar USD", "Hectocorn": "Valuasi mencapai 100 Miliar USD"} },
+
+            { type: 'match', question: "Jodohkan model bisnis (E-commerce) berikut!", 
+              left: ["B2B", "B2C", "C2C"], 
+              right: ["Perusahaan menjual ke perusahaan lain", "Perusahaan menjual langsung ke konsumen akhir", "Konsumen menjual barang ke konsumen lain (misal: barang bekas)"], 
+              answer: {"B2B": "Perusahaan menjual ke perusahaan lain", "B2C": "Perusahaan menjual langsung ke konsumen akhir", "C2C": "Konsumen menjual barang ke konsumen lain (misal: barang bekas)"} },
+
+            { type: 'match', question: "Jodohkan tokoh dengan teori/konsep yang sering dikaitkan dengannya!", 
+              left: ["Joseph Schumpeter", "Eric Ries", "Alexander Osterwalder"], 
+              right: ["Teori Inovasi & Creative Destruction", "Metodologi Lean Startup", "Pencipta Business Model Canvas (BMC)"], 
+              answer: {"Joseph Schumpeter": "Teori Inovasi & Creative Destruction", "Eric Ries": "Metodologi Lean Startup", "Alexander Osterwalder": "Pencipta Business Model Canvas (BMC)"} },
+
+            { type: 'match', question: "Jodohkan jenis Inovasi berikut dengan deskripsinya!", 
+              left: ["Inovasi Produk", "Inovasi Proses", "Inovasi Model Bisnis"], 
+              right: ["Membuat barang/jasa baru atau memperbaikinya", "Meningkatkan cara produksi atau distribusi agar lebih efisien", "Mengubah cara perusahaan menghasilkan uang"], 
+              answer: {"Inovasi Produk": "Membuat barang/jasa baru atau memperbaikinya", "Inovasi Proses": "Meningkatkan cara produksi atau distribusi agar lebih efisien", "Inovasi Model Bisnis": "Mengubah cara perusahaan menghasilkan uang"} },
+
+            { type: 'match', question: "Jodohkan komponen Analisis SWOT berikut!", 
+              left: ["Strengths (S)", "Threats (T)", "Opportunities (O)"], 
+              right: ["Kelebihan internal yang dimiliki bisnis", "Ancaman dari luar (pesaing, regulasi baru)", "Peluang dari luar yang bisa dimanfaatkan"], 
+              answer: {"Strengths (S)": "Kelebihan internal yang dimiliki bisnis", "Threats (T)": "Ancaman dari luar (pesaing, regulasi baru)", "Opportunities (O)": "Peluang dari luar yang bisa dimanfaatkan"} },
+
+            { type: 'match', question: "Jodohkan sumber pendanaan dengan deskripsinya!", 
+              left: ["Bootstrapping", "Venture Capital", "Bank Loan"], 
+              right: ["Mendanai dengan uang pribadi", "Firma investasi yang mendanai startup berpotensi tinggi", "Pinjaman yang mensyaratkan agunan & bunga bulanan"], 
+              answer: {"Bootstrapping": "Mendanai dengan uang pribadi", "Venture Capital": "Firma investasi yang mendanai startup berpotensi tinggi", "Bank Loan": "Pinjaman yang mensyaratkan agunan & bunga bulanan"} },
+
+            { type: 'match', question: "Jodohkan metrik bisnis startup berikut!", 
+              left: ["CAC", "Churn Rate", "Burn Rate"], 
+              right: ["Biaya untuk mendapat 1 pelanggan baru", "Persentase pelanggan yang berhenti berlangganan", "Kecepatan startup menghabiskan modal/uang kas bulanan"], 
+              answer: {"CAC": "Biaya untuk mendapat 1 pelanggan baru", "Churn Rate": "Persentase pelanggan yang berhenti berlangganan", "Burn Rate": "Kecepatan startup menghabiskan modal/uang kas bulanan"} }
+        ];
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let userAnswers = [];
+        let sortableInstance = null;
+
+        const screens = {
+            start: document.getElementById('start-screen'),
+            quiz: document.getElementById('quiz-screen'),
+            result: document.getElementById('result-screen')
+        };
+        const els = {
+            questionText: document.getElementById('question-text'),
+            answerContainer: document.getElementById('answer-container'),
+            progress: document.getElementById('progress-bar'),
+            counter: document.getElementById('question-counter'),
+            typeBadge: document.getElementById('question-type-badge'),
+            nextBtn: document.getElementById('next-btn'),
+            feedbackMsg: document.getElementById('feedback-msg')
+        };
+
+        function startQuiz() {
+            // Shuffle questions if you want, but we will keep them in order for structure
+            currentQuestionIndex = 0;
+            score = 0;
+            userAnswers = [];
+            switchScreen('quiz');
+            loadQuestion();
+        }
+
+        function switchScreen(screenName) {
+            Object.values(screens).forEach(s => s.classList.add('hidden'));
+            if(screenName === 'quiz') {
+                screens.quiz.classList.remove('hidden');
+                screens.quiz.classList.add('flex'); // Because it's flex-col
+            } else {
+                screens[screenName].classList.remove('hidden');
+            }
+        }
+
+        function loadQuestion() {
+            resetQuestionUI();
+            
+            const q = questionBank[currentQuestionIndex];
+            els.questionText.textContent = q.question;
+            els.counter.textContent = `Pertanyaan ${currentQuestionIndex + 1} / ${questionBank.length}`;
+            
+            // Progress Bar
+            const progressPercent = ((currentQuestionIndex) / questionBank.length) * 100;
+            els.progress.style.width = `${progressPercent}%`;
+
+            if (q.type === 'mcq') {
+                els.typeBadge.textContent = "Pilihan Ganda";
+                els.typeBadge.className = "text-sm font-medium text-blue-700 bg-blue-100 px-3 py-1 rounded-full";
+                renderMCQ(q);
+            } else if (q.type === 'order') {
+                els.typeBadge.textContent = "Mengurutkan (Drag & Drop)";
+                els.typeBadge.className = "text-sm font-medium text-purple-700 bg-purple-100 px-3 py-1 rounded-full";
+                renderOrder(q);
+            } else if (q.type === 'match') {
+                els.typeBadge.textContent = "Menjodohkan";
+                els.typeBadge.className = "text-sm font-medium text-emerald-700 bg-emerald-100 px-3 py-1 rounded-full";
+                renderMatch(q);
+            }
+        }
+
+        function resetQuestionUI() {
+            els.answerContainer.innerHTML = '';
+            els.feedbackMsg.classList.add('hidden');
+            els.feedbackMsg.classList.remove('bg-red-100', 'text-red-700', 'bg-green-100', 'text-green-700');
+            disableNextButton();
+            if(sortableInstance) {
+                sortableInstance.destroy();
+                sortableInstance = null;
+            }
+        }
+
+        function enableNextButton() {
+            els.nextBtn.disabled = false;
+            els.nextBtn.classList.remove('bg-gray-300', 'text-gray-500', 'cursor-not-allowed');
+            els.nextBtn.classList.add('bg-blue-600', 'text-white', 'hover:bg-blue-700', 'cursor-pointer', 'shadow');
+        }
+
+        function disableNextButton() {
+            els.nextBtn.disabled = true;
+            els.nextBtn.classList.add('bg-gray-300', 'text-gray-500', 'cursor-not-allowed');
+            els.nextBtn.classList.remove('bg-blue-600', 'text-white', 'hover:bg-blue-700', 'cursor-pointer', 'shadow');
+        }
+
+        function renderMCQ(q) {
+            // Shuffle options
+            let options = [...q.options].sort(() => Math.random() - 0.5);
+            
+            options.forEach((opt, index) => {
+                const label = document.createElement('label');
+                label.className = "flex items-center p-4 border border-gray-200 rounded-xl cursor-pointer hover:bg-blue-50 hover:border-blue-300 transition duration-200";
+                
+                const input = document.createElement('input');
+                input.type = "radio";
+                input.name = "mcq_answer";
+                input.value = opt;
+                input.className = "w-5 h-5 text-blue-600 focus:ring-blue-500 border-gray-300";
+                input.onchange = enableNextButton;
+
+                const span = document.createElement('span');
+                span.className = "ml-3 text-gray-700 font-medium";
+                span.textContent = opt;
+
+                label.appendChild(input);
+                label.appendChild(span);
+                els.answerContainer.appendChild(label);
+            });
+        }
+
+        function renderOrder(q) {
+            const list = document.createElement('ul');
+            list.id = "sortable-list";
+            list.className = "space-y-2";
+            
+            // Shuffle items to present them unsorted
+            let items = [...q.items].sort(() => Math.random() - 0.5);
+            
+            items.forEach((item, index) => {
+                const li = document.createElement('li');
+                li.className = "flex items-center justify-between p-4 bg-white border border-gray-200 rounded-xl shadow-sm";
+                li.dataset.value = item;
+                
+                const span = document.createElement('span');
+                span.className = "text-gray-700 font-medium";
+                span.textContent = item;
+
+                const dragIcon = document.createElement('div');
+                dragIcon.className = "handle text-gray-400 p-2 -mr-2 cursor-grab active:cursor-grabbing hover:text-gray-600";
+                dragIcon.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>`;
+
+                li.appendChild(span);
+                li.appendChild(dragIcon);
+                list.appendChild(li);
+            });
+
+            els.answerContainer.appendChild(list);
+
+            const instruction = document.createElement('p');
+            instruction.className = "text-sm text-gray-500 mt-3 italic text-center";
+            instruction.textContent = "Tarik dan lepaskan (Drag & Drop) ikon garis di sebelah kanan untuk mengurutkan.";
+            els.answerContainer.appendChild(instruction);
+
+            // Initialize Sortable
+            sortableInstance = new Sortable(list, {
+                handle: '.handle',
+                animation: 150,
+                ghostClass: 'sortable-ghost',
+                dragClass: 'sortable-drag'
+            });
+
+            // Order questions are always "ready" to submit, user decides when order is right
+            enableNextButton();
+        }
+
+        function renderMatch(q) {
+            const table = document.createElement('div');
+            table.className = "flex flex-col space-y-4";
+            
+            // Collect all possible right-side options and shuffle them
+            let rightOptions = [...q.right].sort(() => Math.random() - 0.5);
+
+            q.left.forEach((leftItem, index) => {
+                const row = document.createElement('div');
+                row.className = "flex flex-col md:flex-row md:items-center p-3 sm:p-4 bg-gray-50 border border-gray-200 rounded-xl";
+                
+                const label = document.createElement('div');
+                label.className = "md:w-1/2 text-gray-800 font-medium mb-2 md:mb-0 md:pr-4";
+                label.textContent = leftItem;
+
+                const selectWrap = document.createElement('div');
+                selectWrap.className = "md:w-1/2";
+
+                const select = document.createElement('select');
+                select.className = "w-full p-2.5 bg-white border border-gray-300 rounded-lg text-gray-700 text-sm focus:ring-blue-500 focus:border-blue-500 match-select";
+                select.dataset.left = leftItem;
+                select.onchange = checkMatchCompletion;
+                
+                const defaultOption = document.createElement('option');
+                defaultOption.value = "";
+                defaultOption.textContent = "-- Pilih Jawaban --";
+                defaultOption.disabled = true;
+                defaultOption.selected = true;
+                select.appendChild(defaultOption);
+
+                rightOptions.forEach(opt => {
+                    const option = document.createElement('option');
+                    option.value = opt;
+                    option.textContent = opt;
+                    select.appendChild(option);
+                });
+
+                selectWrap.appendChild(select);
+                row.appendChild(label);
+                row.appendChild(selectWrap);
+                table.appendChild(row);
+            });
+
+            els.answerContainer.appendChild(table);
+        }
+
+        function checkMatchCompletion() {
+            const selects = document.querySelectorAll('.match-select');
+            let allAnswered = true;
+            selects.forEach(sel => {
+                if(sel.value === "") allAnswered = false;
+            });
+            if(allAnswered) enableNextButton();
+            else disableNextButton();
+        }
+
+        function submitAnswer() {
+            if (els.nextBtn.disabled) return;
+            
+            const q = questionBank[currentQuestionIndex];
+            let isCorrect = false;
+
+            // Lock UI
+            disableNextButton();
+            if (q.type === 'mcq') {
+                const selected = document.querySelector('input[name="mcq_answer"]:checked');
+                const radios = document.querySelectorAll('input[name="mcq_answer"]');
+                radios.forEach(r => r.disabled = true);
+                
+                if (selected && selected.value === q.answer) {
+                    isCorrect = true;
+                }
+            } else if (q.type === 'order') {
+                const currentOrder = Array.from(document.querySelectorAll('#sortable-list li')).map(li => li.dataset.value);
+                sortableInstance.option("disabled", true); // Disable drag
+
+                // Compare arrays
+                if (JSON.stringify(currentOrder) === JSON.stringify(q.answer)) {
+                    isCorrect = true;
+                }
+            } else if (q.type === 'match') {
+                const selects = document.querySelectorAll('.match-select');
+                isCorrect = true;
+                selects.forEach(sel => {
+                    sel.disabled = true;
+                    if (q.answer[sel.dataset.left] !== sel.value) {
+                        isCorrect = false;
+                    }
+                });
+            }
+
+            // Score and Feedback
+            if (isCorrect) {
+                score++;
+                els.feedbackMsg.textContent = "✅ Jawaban Anda Benar!";
+                els.feedbackMsg.classList.add('bg-green-100', 'text-green-800');
+            } else {
+                els.feedbackMsg.textContent = "❌ Jawaban Anda Salah.";
+                els.feedbackMsg.classList.add('bg-red-100', 'text-red-800');
+            }
+            els.feedbackMsg.classList.remove('hidden');
+
+            // Delay before moving to next question
+            setTimeout(() => {
+                currentQuestionIndex++;
+                if (currentQuestionIndex < questionBank.length) {
+                    loadQuestion();
+                } else {
+                    showResults();
+                }
+            }, 1000); // 1 second delay to read feedback
+        }
+
+        function showResults() {
+            switchScreen('result');
+            
+            // Calculate final score out of 100
+            const maxScore = questionBank.length;
+            const finalScore = Math.round((score / maxScore) * 100);
+            
+            document.getElementById('final-score').textContent = finalScore;
+            const iconContainer = document.getElementById('result-icon');
+            
+            if (finalScore >= 80) {
+                iconContainer.className = "w-24 h-24 mx-auto mb-6 rounded-full flex items-center justify-center bg-green-100 text-green-600";
+                iconContainer.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>`;
+            } else if (finalScore >= 50) {
+                iconContainer.className = "w-24 h-24 mx-auto mb-6 rounded-full flex items-center justify-center bg-yellow-100 text-yellow-600";
+                iconContainer.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>`;
+            } else {
+                iconContainer.className = "w-24 h-24 mx-auto mb-6 rounded-full flex items-center justify-center bg-red-100 text-red-600";
+                iconContainer.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>`;
+            }
+        }
+
+        function restartQuiz() {
+            switchScreen('start');
+        }
+
+    </script>
+</body>
+</html>
