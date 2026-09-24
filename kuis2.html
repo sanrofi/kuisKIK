@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kuis Dasar Kreatif, Inovasi & Kewirausahaan</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f0fdf4;
+            color: #1f2937;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 650px;
+            padding: 30px;
+        }
+
+        h1, h2 {
+            text-align: center;
+            color: #059669;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus {
+            border-color: #10b981;
+            outline: none;
+        }
+
+        .btn {
+            display: block;
+            width: 100%;
+            background-color: #10b981;
+            color: white;
+            border: none;
+            padding: 14px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 15px;
+        }
+
+        .btn:hover {
+            background-color: #059669;
+        }
+
+        .btn:disabled {
+            background-color: #9ca3af;
+            cursor: not-allowed;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* Quiz UI */
+        .quiz-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f3f4f6;
+            font-size: 14px;
+            color: #4b5563;
+        }
+
+        .question-text {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option-btn {
+            background-color: #f9fafb;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 12px 15px;
+            text-align: left;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .option-btn:hover {
+            background-color: #ecfdf5;
+            border-color: #10b981;
+        }
+
+        .option-btn.selected {
+            background-color: #d1fae5;
+            border-color: #10b981;
+            font-weight: 600;
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            background-color: #e5e7eb;
+            height: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background-color: #10b981;
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+        /* Result UI */
+        .result-box {
+            text-align: center;
+        }
+
+        .score-display {
+            font-size: 48px;
+            font-weight: bold;
+            color: #059669;
+            margin: 20px 0;
+        }
+
+        .status-msg {
+            margin-top: 15px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .status-loading { color: #d97706; }
+        .status-success { color: #059669; }
+        .status-error { color: #dc2626; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- SCREEN 1: IDENTITAS -->
+    <div id="screen-start">
+        <h1>Kuis Kewirausahaan</h1>
+        <p style="text-align: center; margin-bottom: 20px; color: #6b7280;">Materi: Dasar Kreatif, Inovasi & Kewirausahaan (50 Soal)</p>
+        <form id="form-identity">
+            <div class="form-group">
+                <label for="input-name">Nama Lengkap:</label>
+                <input type="text" id="input-name" required placeholder="Masukkan nama Anda">
+            </div>
+            <div class="form-group">
+                <label for="input-class">Kelas / Rombel:</label>
+                <input type="text" id="input-class" required placeholder="Masukkan kelas Anda">
+            </div>
+            <button type="submit" class="btn">Mulai Kuis</button>
+        </form>
+    </div>
+
+    <!-- SCREEN 2: KUIS -->
+    <div id="screen-quiz" class="hidden">
+        <div class="quiz-header">
+            <div><strong id="user-info"></strong></div>
+            <div>Soal <span id="current-num">1</span> dari 50</div>
+        </div>
+        <div class="progress-bar-container">
+            <div class="progress-bar" id="progress-bar"></div>
+        </div>
+        <div class="question-text" id="question-text">Teks Pertanyaan...</div>
+        <div class="options-container" id="options-container">
+            <!-- Pilihan jawaban di-generate via JS -->
+        </div>
+        <button id="btn-next" class="btn" style="margin-top: 25px;" disabled>Lanjut</button>
+    </div>
+
+    <!-- SCREEN 3: HASIL -->
+    <div id="screen-result" class="hidden">
+        <div class="result-box">
+            <h2>Kuis Selesai!</h2>
+            <p>Terima kasih telah menyelesaikan kuis ini.</p>
+            <div class="score-display" id="final-score">0 / 100</div>
+            <p id="correct-count-text">Jawaban Benar: 0 dari 50 Soal</p>
+            
+            <div id="status-msg" class="status-msg status-loading">Memproses & mengirim nilai ke Spreadsheet...</div>
+
+            <button id="btn-restart" class="btn" style="margin-top: 30px;">Coba Lagi</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ==========================================
+    // 1. KONFIGURASI SCRIPT
+    // ==========================================
+    // GANTI URL DI BAWAH DENGAN URL WEB APP GOOGLE APPS SCRIPT ANDA
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbxo8Ibe0QaBUnLB36eEG6qPB1K8ztfR9sojoL2zuxiBbNypXzGh8JtLxe_WJYDSck9LMA/exec"; 
+    
+    // Judul kuis ini (Akan menjadi nama File Spreadsheet di Google Drive)
+    const QUIZ_TITLE = "Kreatif Inovasi & Kewirausahaan Dasar";
+
+    // ==========================================
+    // 2. DATA 50 SOAL
+    // ==========================================
+    const questions = [
+        { q: "Kemampuan untuk mengembangkan ide-ide baru dan menemukan cara-cara baru dalam memandang masalah disebut...", options: ["Inovasi", "Kreativitas", "Kewirausahaan", "Efisiensi"], answer: 1 },
+        { q: "Penerapan praktis dari ide kreatif menjadi produk atau layanan yang memiliki nilai tambah disebut...", options: ["Kreativitas", "Inovasi", "Kewirausahaan", "Produksi"], answer: 1 },
+        { q: "Seseorang yang mengambil risiko untuk memulai dan menjalankan bisnis baru disebut...", options: ["Manajer", "Wirausahawan", "Direktur", "Karyawan"], answer: 1 },
+        { q: "Salah satu ciri utama seorang wirausahawan yang sukses adalah...", options: ["Takut gagal", "Berani mengambil risiko terukur", "Menghindari perubahan", "Bergantung pada orang lain"], answer: 1 },
+        { q: "Proses menciptakan nilai baru melalui pengidentifikasian peluang usaha disebut...", options: ["Manajemen", "Kewirausahaan", "Pemasaran", "Investasi"], answer: 1 },
+        { q: "Manakah yang merupakan contoh dari kreativitas?", options: ["Memproduksi barang sesuai instruksi", "Menemukan fungsi baru dari barang bekas", "Menjual produk yang sudah ada", "Membeli barang murah"], answer: 1 },
+        { q: "Inovasi yang menghasilkan produk yang benar-benar baru dan belum pernah ada sebelumnya disebut inovasi...", options: ["Inkremental", "Radikal", "Proses", "Pemasaran"], answer: 1 },
+        { q: "Analisis SWOT digunakan untuk mengevaluasi posisi bisnis. Huruf 'S' dalam SWOT berarti...", options: ["Strategy", "Strength", "System", "Solution"], answer: 1 },
+        { q: "Dalam analisis SWOT, faktor internal yang menguntungkan perusahaan adalah...", options: ["Strengths dan Weaknesses", "Strengths dan Opportunities", "Opportunities dan Threats", "Weaknesses dan Threats"], answer: 0 },
+        { q: "Faktor eksternal yang dapat mengancam keberlangsungan usaha dalam analisis SWOT adalah...", options: ["Strength", "Weakness", "Opportunity", "Threat"], answer: 3 },
+        { q: "Sikap pantang menyerah dan terus berusaha meskipun menghadapi kegagalan disebut...", options: ["Inovasi", "Persistensi (Ketekunan)", "Kreativitas", "Egoisme"], answer: 1 },
+        { q: "Proses memikirkan masalah secara terbuka dan menghasilkan banyak ide tanpa menilai terlebih dahulu disebut...", options: ["Brainstorming", "Evaluation", "Execution", "Budgeting"], answer: 0 },
+        { q: "Kemampuan membaca situasi dan melihat celah untuk menghasilkan keuntungan disebut...", options: ["Melihat peluang usaha", "Membuat produk", "Menghitung modal", "Menilai orang"], answer: 0 },
+        { q: "Model bisnis canvas (Business Model Canvas) terdiri dari berapa elemen utama?", options: ["5", "7", "9", "12"], answer: 2 },
+        { q: "Elemen BMC yang menjelaskan siapa sasaran pelanggan dari bisnis kita adalah...", options: ["Value Proposition", "Customer Segments", "Channels", "Key Activities"], answer: 1 },
+        { q: "Nilai keunggulan atau manfaat yang ditawarkan produk kepada pelanggan dalam BMC disebut...", options: ["Value Proposition", "Revenue Streams", "Key Resources", "Cost Structure"], answer: 0 },
+        { q: "Pendapatan utama yang diperoleh usaha dari penjualan barang/jasa disebut...", options: ["Cost Structure", "Revenue Stream", "Key Partnerships", "Customer Relationship"], answer: 1 },
+        { q: "Kemampuan beradaptasi dengan perubahan pasar merupakan ciri wirausahawan yang...", options: ["Kaku", "Fleksibel", "Pasif", "Pessimis"], answer: 1 },
+        { q: "Mengapa inovasi sangat penting bagi kelangsungan bisnis?", options: ["Agar harga produk bisa mahal", "Agar bisnis mampu bersaing dan berkembang", "Agar tidak perlu membayar pajak", "Agar tidak membutuhkan karyawan"], answer: 1 },
+        { q: "Suatu prototipe (prototype) dibuat dengan tujuan untuk...", options: ["Dijual langsung ke konsumen dalam jumlah besar", "Menguji fungsi dan konsep dasar produk", "Menghitung keuntungan bersih", "Menggantikan produk akhir"], answer: 1 },
+        { q: "Rasa ingin tahu yang tinggi merupakan karakteristik dasar dari pemikir yang...", options: ["Kreatif", "Pasif", "Ragu-ragu", "Konservatif"], answer: 0 },
+        { q: "Modal utama seorang wirausahawan tidak hanya berupa uang, tetapi juga berupa...", options: ["Hutang", "Gengsi", "Pengetahuan dan keterampilan", "Keluarga kaya"], answer: 2 },
+        { q: "Meniru produk orang lain lalu menambahkan nilai tambah atau keunggulan baru dikenal dengan istilah...", options: ["Plagiat murni", "ATM (Amati, Tiru, Modifikasi)", "Monopoli", "Kloning"], answer: 1 },
+        { q: "Hambatan utama dalam berpikir kreatif biasanya adalah...", options: ["Banyak informasi", "Takut salah dan takut gagal", "Terlalu banyak ide", "Dukungan teman"], answer: 1 },
+        { q: "Tindakan etis dalam wirausaha adalah...", options: ["Mengurangi timbangan demi untung", "Jujur mengenai kualitas produk", "Mengabaikan hak konsumen", "Menjiplak merek terkenal"], answer: 1 },
+        { q: "Aktivitas mengenalkan produk kepada calon konsumen agar tertarik membeli disebut...", options: ["Produksi", "Pemasaran (Marketing)", "Distribusi", "Konsumsi"], answer: 1 },
+        { q: "Istilah 'Design Thinking' menekankan pendekatan penciptaan solusi yang berfokus pada...", options: ["Keinginan pemilik modal", "Kebutuhan manusia/pengguna (Human-centered)", "Mesin produksi", "Peraturan pemerintah"], answer: 1 },
+        { q: "Wirausaha yang berfokus pada penyelesaian masalah sosial masyarakat disebut...", options: ["Technopreneur", "Sociopreneur", "Ecopreneur", "Intrapreneur"], answer: 1 },
+        { q: "Wirausaha yang berbasis teknologi tinggi sering disebut...", options: ["Sociopreneur", "Technopreneur", "Trader", "Distributor"], answer: 1 },
+        { q: "Perhitungan untuk mengetahui titik impas di mana usaha tidak rugi dan tidak untung disebut...", options: ["Cashflow", "Break Even Point (BEP)", "Profit Margin", "Return on Investment"], answer: 1 },
+        { q: "Biaya yang besarnya tetap dan tidak dipengaruhi oleh jumlah produksi disebut...", options: ["Biaya Variabel", "Biaya Tetap (Fixed Cost)", "Biaya Lain-lain", "Biaya Bahan Baku"], answer: 1 },
+        { q: "Contoh biaya variabel dalam pembuatan kue adalah...", options: ["Sewa gedung tahunan", "Gaji pegawai tetap", "Tepung dan gula", "Pajak bangunan"], answer: 2 },
+        { q: "Langkah awal dalam merencanakan sebuah usaha baru adalah...", options: ["Membeli peralatan mahal", "Mengidentifikasi masalah atau kebutuhan pasar", "Menyewa ruko", "Merekrut banyak karyawan"], answer: 1 },
+        { q: "Sikap pantang menyerah saat mengalami kerugian bisnis mencerminkan mental...", options: ["Resiliensi (Ketahanan)", "Ketakutan", "Arogansi", "Pesimisme"], answer: 0 },
+        { q: "Menghormati hak cipta dan paten karya orang lain termasuk dalam etika...", options: ["Produksi", "Kekayaan Intelektual", "Keuangan", "Pemasaran"], answer: 1 },
+        { q: "Penyampaian pesan singkat dan padat mengenai ide bisnis kepada calon investor disebut...", options: ["Laporan Keuangan", "Elevator Pitch", "Surat Perjanjian", "Notulensi"], answer: 1 },
+        { q: "Segmentasi pasar berdasarkan wilayah tempat tinggal pembeli disebut segmentasi...", options: ["Demografis", "Geografis", "Psikografis", "Perilaku"], answer: 1 },
+        { q: "Media sosial dimanfaatkan dalam usaha modern terutama untuk fungsi...", options: ["Manajemen stok", "Pemasaran digital (Digital Marketing)", "Pengolahan bahan baku", "Penggajian"], answer: 1 },
+        { q: "Dampak positif dari hadirnya wirausaha bagi perekonomian negara adalah...", options: ["Meningkatkan pengangguran", "Membuka lapangan kerja baru", "Menurunkan pendapatan daerah", "Menghambat inovasi"], answer: 1 },
+        { q: "Karakteristik wirausaha yang selalu berpikiran positif terhadap masa depan adalah...", options: ["Optimis", "Pesimis", "Realistis", "Kritis"], answer: 0 },
+        { q: "Pengembangan produk baru berdasarkan masukan dan kritik pelanggan merupakan tindakan yang...", options: ["Sia-sia", "Tepat untuk perbaikan kualitas", "Merugikan usaha", "Melanggar hukum"], answer: 1 },
+        { q: "Seseorang yang berinovasi dan berjiwa wirausaha tetapi bekerja di dalam perusahaan besar disebut...", options: ["Intrapreneur", "Extrapreneur", "Manager", "Supervisor"], answer: 0 },
+        { q: "Proses mengubah ide menjadi produk nyata yang siap diuji ke pengguna disebut tahap...", options: ["Ideasi", "Prototyping", "Evaluasi", "Pemasaran"], answer: 1 },
+        { q: "Risiko finansial yang dihadapi wirausahawan adalah...", options: ["Kehilangan ide", "Kerugian modal uang", "Kelebihan pelanggan", "Peningkatan profit"], answer: 1 },
+        { q: "Perubahan kemasan produk menjadi lebih ramah lingkungan termasuk jenis inovasi...", options: ["Inovasi Produk/Kemasan", "Inovasi Keuangan", "Inovasi Harga", "Inovasi Hukum"], answer: 0 },
+        { q: "Kemampuan mendengarkan kebutuhan konsumen secara empati merupakan bagian penting dari...", options: ["Design Thinking", "Akuntansi", "Pajak Usaha", "Eksploitasi"], answer: 0 },
+        { q: "Manakah yang BUKAN merupakan ciri pemikir kreatif?", options: ["Suka bertanya", "Terbuka pada hal baru", "Takut mencoba hal baru", "Memilki imajinasi tinggi"], answer: 2 },
+        { q: "Gaya kepemimpinan yang mau mendengarkan masukan dari anggota tim dalam usaha disebut kepemimpinan...", options: ["Otoriter", "Demokratis", "Apatis", "Kaku"], answer: 1 },
+        { q: "Catatan rekapitulasi arus masuk dan keluar uang dalam bisnis disebut...", options: ["Laporan Arus Kas (Cash Flow)", "Brosur", "Struktur Organisasi", "Rencana Pemasaran"], answer: 0 },
+        { q: "Tujuan utama dari kewirausahaan selain mencari keuntungan adalah...", options: ["Menambah beban sosial", "Memberikan solusi atas masalah di masyarakat", "Menghabiskan modal", "Menyaingi orang lain"], answer: 1 }
+    ];
+
+    // ==========================================
+    // 3. STATE MANAJEMEN APLIKASI
+    // ==========================================
+    let currentQuestionIndex = 0;
+    let selectedAnswer = null;
+    let score = 0;
+    let userData = {
+        name: "",
+        kelas: ""
+    };
+
+    // DOM Elements
+    const screenStart = document.getElementById('screen-start');
+    const screenQuiz = document.getElementById('screen-quiz');
+    const screenResult = document.getElementById('screen-result');
+    
+    const formIdentity = document.getElementById('form-identity');
+    const inputName = document.getElementById('input-name');
+    const inputClass = document.getElementById('input-class');
+    
+    const userInfo = document.getElementById('user-info');
+    const currentNum = document.getElementById('current-num');
+    const progressBar = document.getElementById('progress-bar');
+    const questionText = document.getElementById('question-text');
+    const optionsContainer = document.getElementById('options-container');
+    const btnNext = document.getElementById('btn-next');
+    
+    const finalScore = document.getElementById('final-score');
+    const correctCountText = document.getElementById('correct-count-text');
+    const statusMsg = document.getElementById('status-msg');
+    const btnRestart = document.getElementById('btn-restart');
+
+    // ==========================================
+    // 4. EVENT LISTENERS & LOGIC
+    // ==========================================
+
+    // Form Identitas
+    formIdentity.addEventListener('submit', function(e) {
+        e.preventDefault();
+        userData.name = inputName.value.trim();
+        userData.kelas = inputClass.value.trim();
+
+        if (userData.name && userData.kelas) {
+            userInfo.textContent = `${userData.name} (${userData.kelas})`;
+            screenStart.classList.add('hidden');
+            screenQuiz.classList.remove('hidden');
+            startQuiz();
+        }
+    });
+
+    // Mulai Kuis
+    function startQuiz() {
+        currentQuestionIndex = 0;
+        score = 0;
+        showQuestion();
+    }
+
+    // Tampilkan Soal
+    function showQuestion() {
+        selectedAnswer = null;
+        btnNext.disabled = true;
+
+        const q = questions[currentQuestionIndex];
+        
+        // Update header & progress bar
+        currentNum.textContent = currentQuestionIndex + 1;
+        const progressPercent = ((currentQuestionIndex + 1) / questions.length) * 100;
+        progressBar.style.width = `${progressPercent}%`;
+
+        // Render Teks Soal
+        questionText.textContent = `${currentQuestionIndex + 1}. ${q.q}`;
+
+        // Render Pilihan Jawaban
+        optionsContainer.innerHTML = '';
+        q.options.forEach((opt, idx) => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'option-btn';
+            btn.textContent = `${String.fromCharCode(65 + idx)}. ${opt}`;
+            
+            btn.addEventListener('click', () => {
+                // Remove selected class from all
+                document.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
+                // Highlight choice
+                btn.classList.add('selected');
+                selectedAnswer = idx;
+                btnNext.disabled = false; // Aktifkan tombol lanjut
+            });
+
+            optionsContainer.appendChild(btn);
+        });
+    }
+
+    // Tombol Lanjut
+    btnNext.addEventListener('click', () => {
+        if (selectedAnswer === null) return;
+
+        // Cek jawaban (Tanpa memberitahu pengguna jika salah)
+        if (selectedAnswer === questions[currentQuestionIndex].answer) {
+            score++;
+        }
+
+        currentQuestionIndex++;
+
+        if (currentQuestionIndex < questions.length) {
+            showQuestion();
+        } else {
+            finishQuiz();
+        }
+    });
+
+    // Selesai Kuis
+    function finishQuiz() {
+        screenQuiz.classList.add('hidden');
+        screenResult.classList.remove('hidden');
+
+        const calculatedGrade = Math.round((score / questions.length) * 100);
+        finalScore.textContent = calculatedGrade;
+        correctCountText.textContent = `Jawaban Benar: ${score} dari ${questions.length} Soal`;
+
+        // Kirim Nilai ke Google Apps Script
+        sendDataToGAS(calculatedGrade);
+    }
+
+    // Kirim Data via Fetch API
+    function sendDataToGAS(calculatedGrade) {
+        statusMsg.className = "status-msg status-loading";
+        statusMsg.textContent = "Memproses & mengirim nilai ke Spreadsheet...";
+
+        const payload = {
+            quizTitle: QUIZ_TITLE,
+            name: userData.name,
+            kelas: userData.kelas,
+            score: score,
+            totalQuestions: questions.length
+        };
+
+        fetch(GAS_URL, {
+            method: 'POST',
+            mode: 'no-cors', // Penting untuk bypass CORS restriction pada GAS
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        })
+        .then(() => {
+            // Karena mode 'no-cors', respons tidak bisa dibaca langsung, tapi request sampai jika sukses
+            statusMsg.className = "status-msg status-success";
+            statusMsg.textContent = "✓ Nilai berhasil dikirim ke Spreadsheet Guru!";
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            statusMsg.className = "status-msg status-error";
+            statusMsg.textContent = "✕ Gagal mengirim nilai secara otomatis. Cek koneksi internet Anda.";
+        });
+    }
+
+    // Coba Lagi
+    btnRestart.addEventListener('click', () => {
+        screenResult.classList.add('hidden');
+        screenStart.classList.remove('hidden');
+        inputName.value = userData.name; // Simpan nama agar tak perlu ketik ulang
+        inputClass.value = userData.kelas;
+    });
+</script>
+
+</body>
+</html>
