@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulasi Perjalanan Bisnis Makanan</title>
+    <style>
+        :root {
+            --primary-color: #10B981; /* Emerald Green */
+            --primary-hover: #059669;
+            --bg-color: #F3F4F6;
+            --card-bg: #FFFFFF;
+            --text-main: #1F2937;
+            --text-muted: #6B7280;
+            --border-color: #E5E7EB;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            background-color: var(--card-bg);
+            max-width: 600px;
+            width: 100%;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+            padding: 40px 30px;
+            overflow: hidden;
+        }
+
+        h1, h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: var(--text-main);
+        }
+
+        p.subtitle {
+            text-align: center;
+            color: var(--text-muted);
+            margin-bottom: 30px;
+            line-height: 1.5;
+        }
+
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+        }
+
+        /* Button Styles */
+        button {
+            width: 100%;
+            padding: 14px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.05rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.1s;
+        }
+
+        button:hover {
+            background-color: var(--primary-hover);
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        button:disabled {
+            background-color: #9CA3AF;
+            cursor: not-allowed;
+        }
+
+        /* Quiz Styles */
+        .quiz-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 15px;
+        }
+
+        .question-number {
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .question-text {
+            font-size: 1.15rem;
+            line-height: 1.6;
+            margin-bottom: 25px;
+            font-weight: 500;
+        }
+
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option-btn {
+            background-color: white;
+            color: var(--text-main);
+            border: 2px solid var(--border-color);
+            text-align: left;
+            padding: 15px 20px;
+            font-weight: normal;
+            font-size: 1rem;
+        }
+
+        .option-btn:hover {
+            background-color: #F9FAFB;
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        /* Screen Management */
+        .screen {
+            display: none;
+            animation: fadeIn 0.4s ease-in-out;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Result Styles */
+        .result-icon {
+            font-size: 4rem;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        
+        .score-display {
+            font-size: 3rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .ending-message {
+            text-align: center;
+            font-size: 1.1rem;
+            margin-bottom: 30px;
+            line-height: 1.6;
+            padding: 15px;
+            background-color: #F9FAFB;
+            border-radius: 8px;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .loading-text {
+            text-align: center;
+            color: var(--text-muted);
+            margin-top: 15px;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- Start Screen -->
+        <div id="start-screen" class="screen active">
+            <h1>CEO Simulator: Food Edition</h1>
+            <p class="subtitle">Uji insting bisnismu! Simulasi ini akan membawa Anda melewati 20 tahapan krusial dalam membangun bisnis makanan dari nol hingga sukses. Setiap keputusan menentukan masa depan bisnis Anda.</p>
+            
+            <div class="form-group">
+                <label for="input-nama">Nama Lengkap</label>
+                <input type="text" id="input-nama" placeholder="Masukkan nama lengkap Anda" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="input-kelas">Kelas / Rombel / Instansi</label>
+                <input type="text" id="input-kelas" placeholder="Contoh: XII IPA 1 / Umum" required>
+            </div>
+            
+            <button id="btn-start" onclick="startQuiz()">Mulai Simulasi Bisnis</button>
+        </div>
+
+        <!-- Quiz Screen -->
+        <div id="quiz-screen" class="screen">
+            <div class="quiz-header">
+                <span class="question-number" id="question-counter">Tahap 1 / 20</span>
+            </div>
+            <div class="question-text" id="question-text">
+                <!-- Pertanyaan muncul di sini -->
+            </div>
+            <div class="options-container" id="options-container">
+                <!-- Pilihan muncul di sini -->
+            </div>
+        </div>
+
+        <!-- Result Screen -->
+        <div id="result-screen" class="screen">
+            <div class="result-icon" id="result-icon">🏆</div>
+            <h2>Simulasi Selesai!</h2>
+            <div class="score-display" id="score-display">0/20</div>
+            <div class="ending-message" id="ending-message">
+                <!-- Pesan ending muncul di sini -->
+            </div>
+            <p id="sync-status" class="loading-text">Menyimpan hasil perjalanan bisnis Anda...</p>
+            <button onclick="location.reload()" style="margin-top: 20px;">Coba Lagi (Mulai Ulang)</button>
+        </div>
+    </div>
+
+    <script>
+        // Data Kuis Simulasi Perjalanan Bisnis
+        const quizData = [
+            {
+                question: "TAHAP 1: Anda baru lulus dan ingin membuka bisnis makanan. Modal Anda terbatas hanya Rp 2 Juta. Apa langkah pertama Anda?",
+                options: [
+                    { text: "Melakukan riset pasar kecil-kecilan dan mulai produksi dari dapur rumah.", isCorrect: true },
+                    { text: "Meminjam uang puluhan juta ke bank agar langsung bisa sewa ruko.", isCorrect: false },
+                    { text: "Ikut-ikutan tren makanan viral tanpa membuat perencanaan bisnis.", isCorrect: false },
+                    { text: "Mencari investor besar tanpa memiliki produk atau business plan yang jelas.", isCorrect: false },
+                    { text: "Membeli perlengkapan dapur mahal yang menghabiskan seluruh modal.", isCorrect: false }
+                ]
+            },
+            {
+                question: "TAHAP 2: Anda memutuskan menjual 'Rice Bowl Ayam Spesial'. Bagaimana cara Anda menentukan resep yang tepat?",
+                options: [
+                    { text: "Membuat beberapa variasi resep dan meminta teman/keluarga melakukan tes rasa (blind test).", isCorrect: true },
+                    { text: "Menggunakan resep instan dari internet tanpa melakukan modifikasi sama sekali.", isCorrect: false },
+                    { text: "Membayar chef profesional dengan harga mahal untuk membuat resep.", isCorrect: false },
+                    { text: "Mencampur bahan-bahan termurah asal porsinya terlihat banyak.", isCorrect: false },
+                    { text: "Meniru persis 100% resep kompetitor yang sudah sukses di pasaran.", isCorrect: false }
+                ]
+            },
+            {
+                question: "TAHAP 3: Produk sudah siap. Sekarang Anda harus menentukan nama dan branding (merek) bisnis Anda. Pendekatan mana yang terbaik?",
+                options: [
+                    { text: "Memilih nama yang mudah diingat, relevan dengan produk, dan belum dipakai orang lain.", isCorrect: true },
+                    { text: "Menggunakan nama yang sangat panjang dan puitis agar terlihat estetik.", isCorrect: false },
+                    { text: "Memakai nama bahasa asing yang sulit dieja agar terkesan mewah.", isCorrect: false },
+                    { text: "Memplesetkan nama brand terkenal yang sudah ada agar cepat viral.", isCorrect: false },
+                    { text: "Tidak perlu nama brand, cukup bungkus plastik polos karena kualitas yang bicara.", isCorrect: false }
+                ]
+            },
+            {
+                question: "TAHAP 4: Anda mulai berbelanja bahan baku secara rutin. Bagaimana strategi Anda memilih supplier?",
+                options: [
+                    { text: "Mencari supplier yang menawarkan konsistensi kualitas dengan harga yang masuk akal.", isCorrect: true },
+                    { text: "Selalu membeli bahan baku yang paling murah tanpa peduli kebersihan/kualitas.", isCorrect: false },
+                    { text: "Berbelanja di supermarket premium agar bahannya terlihat mewah meski margin tipis.", isCorrect: false },
+                    { text: "Membeli dari supplier berbeda setiap hari tergantung siapa yang sedang diskon.", isCorrect: false },
+                    { text: "Memborong bahan baku untuk stok 1 tahun penuh agar dapat harga pabrik.", isCorrect: false }
+                ]
+            },
+            {
+                question: "TAHAP 5: Saatnya menentukan harga jual (Pricing). Bagaimana cara Anda menghitung harga per porsi?",
+                options: [
+                    { text: "Menghitung seluruh HPP (modal bahan, gas, tenaga) ditambah margin profit dan membandingkannya dengan harga pasar.", isCorrect: true },
+                    { text: "Langsung memasang harga paling murah di bawah pasar agar semua orang beli.", isCorrect: false },
+                    { text: "Memasang harga setinggi mungkin karena merasa resep Anda paling enak.", isCorrect: false },
+                    { text: "Menyamakan harga persis dengan kompetitor tanpa menghitung modal sendiri.", isCorrect: false },
+                    { text: "Menjual dengan harga modal saja di bulan pertama agar cepat terkenal.", isCorrect: false }
+                ]
+            },
+            {
+                question: "TAHAP 6: Anda harus memilih kemasan (packaging) untuk produk Anda. Apa prioritas utama Anda saat ini dengan budget terbatas?",
+                options: [
+                    { text: "Kemasan yang aman menjaga kualitas makanan, tidak mudah tumpah, dan ada stiker logo.", isCorrect: true },
+                    { text: "Kemasan custom full-print yang sangat mahal agar terlihat seperti brand besar.", isCorrect: false },
+                    { text: "Plastik kresek biasa dan karet gelang agar biaya produksi sangat murah.", isCorrect: false },
+                    { text: "Menggunakan kotak kayu eksklusif meski harganya setengah dari harga makanan.", isCorrect: false },
+                    { text: "Kemasan ramah lingkungan impor yang membuat harga jual naik 3x lipat.", isCorrect: false }
+                ]
+            },
+            {
+                question: "TAHAP 7: Hari pertama jualan! Bagaimana strategi pemasaran (marketing) awal Anda?",
+                options: [
+                    { text: "Memanfaatkan media sosial pribadi secara gratis dan mengirimkan tester ke tetangga/teman kantor.", isCorrect: true },
+                    { text: "Menyewa baliho di jalan raya besar dengan sisa uang tabungan.", isCorrect: false },
+                    { text: "Membayar influencer jutaan rupiah meski stok bahan hanya sedikit.", isCorrect: false },
+                    { text: "Diam saja menunggu pembeli datang karena yakin produknya enak.", isCorrect: false },
+                    { text: "Memaksa semua keluarga besar wajib membeli setiap hari.", isCorrect: false }
+                ]
+            },
+            {
+                question: "TAHAP 8: Anda mendapat review buruk pertama dari pelanggan (makanannya terlalu asin). Apa respons Anda?",
+                options: [
+                    { text: "Meminta maaf secara profesional, mengevaluasi resep, dan menawarkan kompensasi (ganti baru/diskon).", isCorrect: true },
+                    { text: "Marah dan membalas komentar pelanggan tersebut karena merasa resep Anda sempurna.", isCorrect: false },
+                    { text: "Menghapus komentar tersebut dan memblokir akun pelanggan.", isCorrect: false },
+                    { text: "Menyalahkan supplier garam yang membuat takaran menjadi berbeda.", isCorrect: false },
+                    { text: "Abaikan saja, satu pelanggan kecewa tidak akan membuat bisnis bangkrut.", isCorrect: false }
+                ]
+            },
+            {
+                question: "TAHAP 9: Pesanan mulai stabil di angka 50 porsi/hari. Anda mulai kewalahan memasak sendiri. Apa tindakan Anda?",
+                options: [
+                    { text: "Membuat Standar Operasional Prosedur (SOP) resep yang jelas, lalu mulai merekrut 1 asisten dapur.", isCorrect: true },
+                    { text: "Tetap bekerja sendiri sampai tidak tidur demi menghemat biaya gaji karyawan.", isCorrect: false },
+                    { text: "Merekrut 5 karyawan sekaligus agar dapur terlihat sibuk dan profesional.", isCorrect: false },
+                    { text: "Membatasi pesanan hanya 10 porsi sehari agar tidak capek.", isCorrect: false },
+                    { text: "Menurunkan kualitas masakan agar proses masak bisa lebih cepat.", isCorrect: false }
+                ]
+            },
+            {
+                question: "TAHAP 10: Uang kas bisnis Anda mulai menumpuk. Bagaimana Anda mengelola keuangan tersebut?",
+                options: [
+                    { text: "Memisahkan rekening pribadi dan rekening bisnis secara ketat, serta mencatat arus kas.", isCorrect: true },
+                    { text: "Menggabungkan uang bisnis dan pribadi agar dompet terlihat tebal.", isCorrect: false },
+                    { text: "Langsung menggunakan uang kas untuk membeli motor baru.", isCorrect: false },
+                    { text: "Menyimpan seluruh uang dalam bentuk tunai di bawah kasur kasir.", isCorrect: false },
+                    { text: "Meminjamkan uang bisnis ke teman yang sedang butuh dana.", isCorrect: false }
+                ]
+            },
+            {
+                question: "TAHAP 11: Ada kompetitor baru di seberang jalan yang menjual produk mirip dengan harga lebih murah. Apa strategi Anda?",
+                options: [
+                    { text: "Fokus mempertahankan kualitas, memperkuat branding, dan meningkatkan pelayanan.", isCorrect: true },
+                    { text: "Ikut menurunkan harga drastis sampai rugi agar pelanggan kompetitor kabur.", isCorrect: false },
+                    { text: "Mengganti seluruh menu Anda menjadi makanan yang benar-benar berbeda.", isCorrect: false },
+                    { text: "Menyebarkan rumor buruk tentang higienitas restoran kompetitor.", isCorrect: false },
+                    { text: "Menyerah dan menutup bisnis karena takut bersaing.", isCorrect: false }
+                ]
+            },
+            {
+                question: "TAHAP 12: Anda berencana mendaftarkan bisnis ke platform ojek online (Food Delivery). Apa yang perlu disiapkan?",
+                options: [
+                    { text: "Menyesuaikan harga jual di aplikasi untuk menutupi potongan komisi platform (sekitar 20%).", isCorrect: true },
+                    { text: "Menyamakan harga aplikasi dengan harga toko, lalu menanggung kerugian komisi sendiri.", isCorrect: false },
+                    { text: "Mengurangi porsi setengahnya khusus untuk pesanan online agar tidak rugi.", isCorrect: false },
+                    { text: "Menolak ikut platform online karena proses daftarnya ribet.", isCorrect: false },
+                    { text: "Menggunakan foto makanan dari internet agar tampilannya menarik di aplikasi.", isCorrect: false }
+                ]
+            },
+            {
+                question: "TAHAP 13: Harga bahan baku utama (ayam) tiba-tiba naik 30% di pasaran. Apa yang Anda lakukan?",
+                options: [
+                    { text: "Menaikkan harga jual sedikit atau menyesuaikan ukuran porsi dengan transparan kepada pelanggan.", isCorrect: true },
+                    { text: "Tetap mempertahankan harga dan porsi, menggunakan sisa tabungan untuk menutupi kerugian.", isCorrect: false },
+                    { text: "Mengganti daging ayam segar dengan daging kualitas rendah yang hampir busuk.", isCorrect: false },
+                    { text: "Menutup restoran sementara sampai harga ayam kembali normal.", isCorrect: false },
+                    { text: "Menghapus menu ayam sepenuhnya dan hanya berjualan nasi putih.", isCorrect: false }
+                ]
+            },
+            {
+                question: "TAHAP 14: Bisnis Anda sudah berjalan 1 tahun dan sukses. Anda ingin membuka cabang fisik pertama (Dine-in). Pemilihan lokasi didasarkan pada?",
+                options: [
+                    { text: "Data demografi, kepadatan lalu lintas, profil target pasar, dan kesesuaian budget sewa.", isCorrect: true },
+                    { text: "Mencari ruko termurah meskipun berada di gang buntu yang tidak ada sinyal.", isCorrect: false },
+                    { text: "Menyewa ruko di mall mewah dengan biaya sewa 200 juta/tahun walau modal belum cukup.", isCorrect: false },
+                    { text: "Membuka cabang di sebelah rumah mantan agar bisa pamer kesuksesan.", isCorrect: false },
+                    { text: "Menyewa tempat yang sangat besar agar terlihat megah meski masih sepi pengunjung.", isCorrect: false }
+                ]
+            },
+            {
+                question: "TAHAP 15: Anda harus mengurus legalitas usaha. Dokumen apa yang paling krusial untuk segera diurus bagi bisnis makanan/minuman?",
+                options: [
+                    { text: "NIB (Nomor Induk Berusaha), Sertifikat PIRT/BPOM, dan Sertifikasi Halal.", isCorrect: true },
+                    { text: "Tidak perlu dokumen apa-apa selama tidak ada petugas yang merazia.", isCorrect: false },
+                    { text: "Hanya perlu mendaftarkan Hak Cipta resep ke Kemenkumham.", isCorrect: false },
+                    { text: "Mengurus surat izin keramaian dari polisi setiap hari.", isCorrect: false },
+                    { text: "Membayar preman setempat agar keamanan terjamin tanpa surat resmi.", isCorrect: false }
+                ]
+            },
+            {
+                question: "TAHAP 16: Pelanggan meminta variasi menu baru karena bosan. Bagaimana strategi ekspansi menu Anda?",
+                options: [
+                    { text: "Menambah variasi rasa (misal: saus baru) yang masih sejalan dengan konsep produk utama.", isCorrect: true },
+                    { text: "Menambahkan 50 menu baru dari berbagai jenis masakan (sushi, pizza, soto) sekaligus.", isCorrect: false },
+                    { text: "Menolak permintaan pelanggan karena merasa resep original adalah yang paling suci.", isCorrect: false },
+                    { text: "Menghapus menu lama dan mengganti dengan menu baru sepenuhnya.", isCorrect: false },
+                    { text: "Menyuruh pelanggan membawa lauk sendiri dari rumah.", isCorrect: false }
+                ]
+            },
+            {
+                question: "TAHAP 17: Operasional cabang terasa berantakan, pencatatan manual sering hilang. Solusi teknologi apa yang Anda terapkan?",
+                options: [
+                    { text: "Menggunakan sistem Point of Sales (POS) terpusat untuk memantau stok dan penjualan real-time.", isCorrect: true },
+                    { text: "Membeli robot koki otomatis senilai milyaran rupiah.", isCorrect: false },
+                    { text: "Kembali menggunakan nota kertas rangkap 3 karena lebih estetik.", isCorrect: false },
+                    { text: "Memasang puluhan CCTV untuk mengawasi karyawan 24 jam karena tidak percaya pencatatan.", isCorrect: false },
+                    { text: "Menutup toko sementara untuk belajar coding dan membuat aplikasi kasir sendiri.", isCorrect: false }
+                ]
+            },
+            {
+                question: "TAHAP 18: Banyak pihak tertarik untuk membeli Franchise (waralaba) bisnis Anda. Apa langkah yang bijak?",
+                options: [
+                    { text: "Menunda franchise sampai sistem, SOP, dan supply chain cabang sendiri benar-benar matang & teruji.", isCorrect: true },
+                    { text: "Langsung menjual franchise sebanyak-banyaknya untuk mendapat uang cepat.", isCorrect: false },
+                    { text: "Memberikan izin franchise gratis asalkan mereka mau memakai merek Anda.", isCorrect: false },
+                    { text: "Menjual resep rahasia kepada mereka lalu membiarkan mereka mengelola sendiri.", isCorrect: false },
+                    { text: "Menolak selamanya karena takut saingan dengan mitra franchise.", isCorrect: false }
+                ]
+            },
+            {
+                question: "TAHAP 19: Ada Investor besar (Venture Capital) yang ingin menyuntikkan dana milyaran rupiah. Apa yang harus Anda persiapkan untuk pertemuan (Pitching)?",
+                options: [
+                    { text: "Menyiapkan Pitch Deck berisi traksi penjualan, rencana ekspansi yang realistis, dan laporan keuangan rapi.", isCorrect: true },
+                    { text: "Hanya membawa sampel makanan dan mengandalkan kemampuan bicara manis.", isCorrect: false },
+                    { text: "Meminta uang muka di awal pertemuan sebelum menjelaskan bisnisnya.", isCorrect: false },
+                    { text: "Memalsukan laporan keuangan agar profit terlihat 10x lipat lebih besar.", isCorrect: false },
+                    { text: "Berpakaian sangat mewah dengan menyewa barang branded agar terlihat sukses.", isCorrect: false }
+                ]
+            },
+            {
+                question: "TAHAP 20 (FINAL): Bisnis Anda kini memiliki 5 cabang yang stabil dan menguntungkan. Ke mana Anda akan mengalokasikan sebagian besar profit bersih tahun ini?",
+                options: [
+                    { text: "Reinvestasi untuk inovasi produk, perbaikan infrastruktur (central kitchen), dan dana darurat bisnis.", isCorrect: true },
+                    { text: "Membeli mobil sport mewah untuk pamer kesuksesan di media sosial.", isCorrect: false },
+                    { text: "Mengambil semua profit untuk liburan keliling dunia selama setahun penuh.", isCorrect: false },
+                    { text: "Membuka 20 cabang baru sekaligus bulan depan tanpa persiapan SDM.", isCorrect: false },
+                    { text: "Berhenti berbisnis, menjual seluruh aset, dan pensiun di usia muda.", isCorrect: false }
+                ]
+            }
+        ];
+
+        // State variables
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let userName = "";
+        let userClass = "";
+        const TOTAL_QUESTIONS = quizData.length;
+
+        // Utility: Fisher-Yates Shuffle
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        // Functions
+        function startQuiz() {
+            const nameInput = document.getElementById("input-nama").value.trim();
+            const classInput = document.getElementById("input-kelas").value.trim();
+
+            if (!nameInput || !classInput) {
+                alert("Harap masukkan Nama Lengkap dan Kelas/Rombel Anda terlebih dahulu.");
+                return;
+            }
+
+            userName = nameInput;
+            userClass = classInput;
+
+            document.getElementById("start-screen").classList.remove("active");
+            document.getElementById("quiz-screen").classList.add("active");
+            
+            renderQuestion();
+        }
+
+        function renderQuestion() {
+            const currentQ = quizData[currentQuestionIndex];
+            
+            // Update counter
+            document.getElementById("question-counter").innerText = `Tahap ${currentQuestionIndex + 1} / ${TOTAL_QUESTIONS}`;
+            
+            // Update Text
+            document.getElementById("question-text").innerText = currentQ.question;
+            
+            // Render Options
+            const optionsContainer = document.getElementById("options-container");
+            optionsContainer.innerHTML = "";
+            
+            // Clone & Shuffle options
+            const shuffledOptions = shuffleArray([...currentQ.options]);
+
+            shuffledOptions.forEach((option) => {
+                const btn = document.createElement("button");
+                btn.className = "option-btn";
+                btn.innerText = option.text;
+                // Saat diklik, langsung cek dan lanjut tanpa memberitahu benar/salah
+                btn.onclick = () => handleOptionClick(option.isCorrect);
+                optionsContainer.appendChild(btn);
+            });
+        }
+
+        function handleOptionClick(isCorrect) {
+            if (isCorrect) {
+                score++;
+            }
+
+            currentQuestionIndex++;
+
+            if (currentQuestionIndex < TOTAL_QUESTIONS) {
+                renderQuestion();
+            } else {
+                endQuiz();
+            }
+        }
+
+        function endQuiz() {
+            document.getElementById("quiz-screen").classList.remove("active");
+            document.getElementById("result-screen").classList.add("active");
+
+            document.getElementById("score-display").innerText = `${score} / ${TOTAL_QUESTIONS}`;
+
+            // Tentukan Ending berdasarkan Skor
+            const endingContainer = document.getElementById("ending-message");
+            const resultIcon = document.getElementById("result-icon");
+            
+            if (score >= 17) {
+                resultIcon.innerText = "👑";
+                endingContainer.innerHTML = "<strong>ENDING: CEO Sukses Nasional!</strong><br>Luar biasa! Keputusan bisnis Anda sangat tajam dan strategis. Bisnis makanan Anda tidak hanya bertahan, tapi kini telah berevolusi menjadi raksasa waralaba kuliner ternama di Indonesia.";
+            } else if (score >= 12) {
+                resultIcon.innerText = "📈";
+                endingContainer.innerHTML = "<strong>ENDING: Pengusaha Menengah Stabil.</strong><br>Kerja bagus! Anda berhasil melewati tantangan awal berbisnis. Walau ada beberapa keputusan yang kurang maksimal, bisnis Anda tetap bertahan dan memiliki basis pelanggan yang loyal.";
+            } else if (score >= 7) {
+                resultIcon.innerText = "⚖️";
+                endingContainer.innerHTML = "<strong>ENDING: Bisnis Stagnan & Berjuang.</strong><br>Anda masih bisa bertahan, namun bisnis berdarah-darah menghadapi kompetitor dan krisis. Diperlukan evaluasi ulang pada strategi dasar bisnis Anda.";
+            } else {
+                resultIcon.innerText = "📉";
+                endingContainer.innerHTML = "<strong>ENDING: Bangkrut dan Tutup.</strong><br>Sayang sekali, serangkaian keputusan yang salah arah (fatal) membuat modal bisnis habis terbakar tanpa menghasilkan profit. Jangan menyerah, jadikan ini sebagai pengalaman belajar yang mahal!";
+            }
+
+            // Kirim data ke backend
+            sendDataToBackend();
+        }
+
+        function sendDataToBackend() {
+            const syncStatus = document.getElementById("sync-status");
+            const urlEndpoint = "https://script.google.com/macros/s/AKfycbxo8Ibe0QaBUnLB36eEG6qPB1K8ztfR9sojoL2zuxiBbNypXzGh8JtLxe_WJYDSck9LMA/exec";
+            
+            // Format Payload WAJIB sesuai instruksi
+            const payload = {
+                "quizTitle": "Kuis Simulasi Perjalanan Bisnis Makanan",
+                "name": userName,
+                "kelas": userClass,
+                "score": score,
+                "totalQuestions": TOTAL_QUESTIONS
+            };
+
+            fetch(urlEndpoint, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            })
+            .then(() => {
+                syncStatus.style.color = "#10B981";
+                syncStatus.innerText = "✅ Hasil perjalanan bisnis Anda berhasil dicatat di sistem!";
+            })
+            .catch((error) => {
+                syncStatus.style.color = "#EF4444";
+                syncStatus.innerText = "❌ Gagal menyimpan data, periksa koneksi Anda.";
+                console.error("Error sending data:", error);
+            });
+        }
+    </script>
+</body>
+</html>
