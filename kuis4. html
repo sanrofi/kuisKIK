@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kuis Interaktif: Pemasaran Konvensional dan Digital</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --success: #10B981;
+            --danger: #ef4444;
+            --background: #f3f4f6;
+            --card-bg: #ffffff;
+            --text-main: #1f2937;
+            --text-muted: #6b7280;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--background);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 800px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background-color: var(--primary);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .screen {
+            display: none;
+        }
+
+        .screen.active {
+            display: block;
+            animation: fadeIn 0.4s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Material Content */
+        .material-box {
+            background-color: #f8fafc;
+            border-left: 4px solid var(--primary);
+            padding: 15px;
+            margin-bottom: 20px;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .material-box h3 {
+            margin-bottom: 10px;
+            color: var(--primary);
+        }
+
+        /* Form */
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 1rem;
+        }
+
+        .warning-box {
+            background-color: #fef2f2;
+            color: var(--danger);
+            padding: 12px;
+            border-radius: 6px;
+            border: 1px solid #f87171;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+
+        /* Buttons */
+        .btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+            width: 100%;
+        }
+
+        .btn:hover { background-color: var(--primary-hover); }
+        .btn:disabled { background-color: #9ca3af; cursor: not-allowed; }
+        
+        .btn-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        /* Quiz Specifics */
+        .question-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .question-text {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            line-height: 1.4;
+        }
+
+        .options-list {
+            list-style: none;
+        }
+
+        .option-item {
+            display: block;
+            padding: 15px;
+            margin-bottom: 10px;
+            background-color: #f9fafb;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .option-item:hover {
+            border-color: var(--primary);
+            background-color: #eff6ff;
+        }
+
+        .option-item.selected {
+            border-color: var(--primary);
+            background-color: #dbeafe;
+            font-weight: bold;
+        }
+
+        /* Loading & Results */
+        .loading {
+            text-align: center;
+            font-style: italic;
+            color: var(--text-muted);
+        }
+
+        .result-box {
+            text-align: center;
+        }
+
+        .result-box h2 { margin-bottom: 10px; }
+        .result-box p { font-size: 1.1rem; margin-bottom: 25px; }
+        .score-circle {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background-color: var(--success);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin: 0 auto 20px auto;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1>Kuis Strategi Pemasaran</h1>
+        <p>Konvensional & Digital</p>
+    </div>
+
+    <div class="content">
+        <!-- 1. MATERIAL SCREEN -->
+        <div id="material-screen" class="screen active">
+            <h2>Materi Pengantar</h2>
+            <div class="material-box">
+                <h3>Pemasaran Konvensional vs Digital</h3>
+                <p><strong>Pemasaran Konvensional</strong> adalah strategi pemasaran yang menggunakan saluran tradisional seperti media cetak (koran, brosur), siaran (TV, Radio), direct mail, dan telemarketing. Pendekatan ini jangkauannya luas namun sulit untuk diukur tingkat konversinya secara presisi.</p>
+                <br>
+                <p><strong>Pemasaran Digital</strong> memanfaatkan internet dan teknologi digital seperti Search Engine Optimization (SEO), Media Sosial (Instagram, TikTok, Facebook), Email Marketing, dan Pay-Per-Click (PPC). Keunggulannya adalah target audiens yang lebih spesifik, biaya yang bisa disesuaikan, dan hasil yang dapat diukur secara real-time melalui analytics.</p>
+                <br>
+                <p>Memahami kedua strategi ini penting bagi bisnis untuk menciptakan pendekatan <em>omnichannel</em> yang menyeluruh. Silakan pahami konsep dasar, kelebihan, serta metrik pengukurannya sebelum memulai kuis ini.</p>
+            </div>
+            <button class="btn" onclick="showScreen('start-screen')">Saya Sudah Paham, Lanjut ke Pendaftaran</button>
+        </div>
+
+        <!-- 2. START SCREEN (FORM) -->
+        <div id="start-screen" class="screen">
+            <div class="warning-box">
+                ⚠️ PERINGATAN: Kuis ini dilengkapi sistem Anti-Kecurangan. Jangan keluar atau berpindah tab/aplikasi saat kuis berlangsung. Jika terdeteksi keluar dari halaman kuis, kuis akan otomatis dihentikan dan nilai saat itu akan langsung dikirim!
+            </div>
+            <form id="registration-form" onsubmit="startQuiz(event)">
+                <div class="form-group">
+                    <label for="no_absen">Nomor Absen</label>
+                    <input type="number" id="no_absen" class="form-control" required placeholder="Contoh: 12">
+                </div>
+                <div class="form-group">
+                    <label for="nama">Nama Lengkap</label>
+                    <input type="text" id="nama" class="form-control" required placeholder="Masukkan nama lengkap">
+                </div>
+                <div class="form-group">
+                    <label for="kelas">Kelas / Rombel</label>
+                    <select id="kelas" class="form-control" required>
+                        <option value="" disabled selected>-- Pilih Kelas --</option>
+                        <option value="XI A AKL">XI A AKL</option>
+                        <option value="XI B AKL">XI B AKL</option>
+                        <option value="XI C AKL">XI C AKL</option>
+                        <option value="XI D AKL">XI D AKL</option>
+                        <option value="XI B PMS">XI B PMS</option>
+                        <option value="XII B PMS">XII B PMS</option>
+                        <option value="XII A AKL">XII A AKL</option>
+                        <option value="XII B AKL">XII B AKL</option>
+                        <option value="XII C AKL">XII C AKL</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn">Mulai Kuis Sekarang</button>
+            </form>
+        </div>
+
+        <!-- 3. QUIZ SCREEN -->
+        <div id="quiz-screen" class="screen">
+            <div class="question-header">
+                <span id="q-counter">Soal 1 / 50</span>
+                <span>Jangan tutup tab ini!</span>
+            </div>
+            <div id="question-text" class="question-text">Memuat pertanyaan...</div>
+            <div class="options-list" id="options-list">
+                <!-- Pilihan jawaban di-render via JS -->
+            </div>
+            
+            <div class="btn-row">
+                <button id="btn-prev" class="btn" style="background-color: var(--text-muted);" onclick="prevQuestion()">Sebelumnya</button>
+                <button id="btn-next" class="btn" onclick="nextQuestion()">Selanjutnya</button>
+            </div>
+        </div>
+
+        <!-- SUBMIT SCREEN (LOADING) -->
+        <div id="loading-screen" class="screen">
+            <div class="loading">
+                <h2 style="margin-bottom:10px;">Menyimpan Jawaban...</h2>
+                <p>Harap tunggu, data sedang dikirim ke server.</p>
+            </div>
+        </div>
+
+        <!-- 4. RESULT SCREEN -->
+        <div id="result-screen" class="screen">
+            <div class="result-box">
+                <h2>Kuis Selesai!</h2>
+                <p id="result-message">Terima kasih, data Anda telah tersimpan.</p>
+                <div class="score-circle" id="final-score">0</div>
+                <p>Jawaban Benar: <span id="correct-count">0</span> dari 50 Soal</p>
+                <button class="btn" onclick="location.reload()" style="margin-top: 15px;">Coba Lagi</button>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    // --- KONFIGURASI BACKEND ---
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxo8Ibe0QaBUnLB36eEG6qPB1K8ztfR9sojoL2zuxiBbNypXzGh8JtLxe_WJYDSck9LMA/exec";
+
+    // --- WAKE LOCK API (Menjaga layar tetap menyala) ---
+    let wakeLock = null;
+    const requestWakeLock = async () => {
+        try {
+            if ('wakeLock' in navigator) {
+                wakeLock = await navigator.wakeLock.request('screen');
+                console.log('Screen Wake Lock aktif.');
+            }
+        } catch (err) {
+            console.error(`${err.name}, ${err.message}`);
+        }
+    };
+
+    const releaseWakeLock = async () => {
+        if (wakeLock !== null) {
+            await wakeLock.release();
+            wakeLock = null;
+            console.log('Screen Wake Lock dimatikan.');
+        }
+    };
+
+    // Re-acquire wake lock if visibility changes but quiz is active
+    document.addEventListener('visibilitychange', async () => {
+        if (wakeLock !== null && document.visibilityState === 'visible') {
+            requestWakeLock();
+        }
+    });
+
+    // --- DATA SOAL (50 Soal Bertahap: Mudah -> Menengah -> Sulit) ---
+    const quizData = [
+        // Level Dasar (1-15)
+        { q: "Apa yang dimaksud dengan pemasaran konvensional?", options: ["Pemasaran menggunakan internet", "Pemasaran menggunakan media fisik atau tradisional seperti koran dan brosur", "Pemasaran melalui email", "Pemasaran yang dilakukan oleh influencer"], ans: 1 },
+        { q: "Contoh dari pemasaran konvensional adalah...", options: ["Iklan di Facebook", "Brosur dan Baliho", "Google Ads", "Email Newsletter"], ans: 1 },
+        { q: "Apa keunggulan utama dari pemasaran konvensional?", options: ["Biaya sangat murah", "Mudah menjangkau pasar lokal secara fisik", "Dapat diukur secara real-time dengan akurat", "Hanya menjangkau anak muda"], ans: 1 },
+        { q: "Pemasaran digital adalah strategi pemasaran yang menggunakan saluran...", options: ["Internet dan perangkat elektronik", "Majalah dan koran", "Surat pos", "Telepon rumah/telemarketing konvensional"], ans: 0 },
+        { q: "Di bawah ini yang bukan merupakan media pemasaran digital adalah...", options: ["Instagram", "Papan reklame jalan raya", "TikTok", "Website Perusahaan"], ans: 1 },
+        { q: "Apa kepanjangan dari SEO dalam pemasaran digital?", options: ["Search Engine Optimization", "Social Engagement Option", "Sales Engine Operation", "Search Electronic Organizer"], ans: 0 },
+        { q: "Tujuan utama SEO adalah...", options: ["Meningkatkan interaksi media sosial", "Menjadikan website muncul di halaman pertama mesin pencari", "Mengirim email massal", "Mendesain brosur"], ans: 1 },
+        { q: "Apa itu target market (pasar sasaran)?", options: ["Semua orang di dunia", "Sekelompok konsumen yang menjadi fokus promosi produk", "Pesaing bisnis kita", "Pemilik perusahaan"], ans: 1 },
+        { q: "Telemarketing merupakan contoh strategi pemasaran...", options: ["Digital", "Online", "Konvensional", "Modern"], ans: 2 },
+        { q: "Mengapa pemasaran digital sering dianggap lebih efektif dibanding konvensional?", options: ["Tidak membutuhkan biaya sama sekali", "Bisa menargetkan audiens secara spesifik berdasarkan demografi dan minat", "Tidak memerlukan internet", "Hanya cocok untuk perusahaan besar"], ans: 1 },
+        { q: "Promosi dari mulut ke mulut secara offline disebut...", options: ["Word of Mouth", "Viral Marketing", "Email Marketing", "Affiliate Marketing"], ans: 0 },
+        { q: "Salah satu kekurangan pemasaran konvensional adalah...", options: ["Sulit menjangkau orang tua", "Membangun kepercayaan sangat cepat", "Sulitnya mengukur ROI (Return on Investment) secara akurat", "Tidak memerlukan biaya"], ans: 2 },
+        { q: "Sosial media yang saat ini sangat populer untuk pemasaran video pendek adalah...", options: ["LinkedIn", "TikTok", "Twitter / X", "Pinterest"], ans: 1 },
+        { q: "Kumpulan halaman web yang saling terhubung untuk menampilkan informasi produk disebut...", options: ["Website", "Email", "SEO", "Banner"], ans: 0 },
+        { q: "Email marketing bertujuan untuk...", options: ["Mengirim spam kepada pelanggan", "Membangun hubungan dan menginformasikan promo ke pelanggan yang mendaftar", "Membuat video viral", "Mencetak brosur digital"], ans: 1 },
+        
+        // Level Menengah (16-35)
+        { q: "Apa yang dimaksud dengan PPC (Pay-Per-Click)?", options: ["Membayar setiap kali pelanggan melihat iklan", "Membayar setiap kali iklan diklik oleh pengguna", "Membayar saat produk terjual", "Iklan gratis di mesin pencari"], ans: 1 },
+        { q: "Jika sebuah bisnis lokal (misal: warung makan baru) ingin menjangkau warga sekitar dengan cepat tanpa internet, strategi apa yang paling tepat?", options: ["SEO Nasional", "Menyebarkan brosur di radius 2 km", "Iklan TV Nasional", "Email marketing massal"], ans: 1 },
+        { q: "Konversi (Conversion) dalam digital marketing mengacu pada...", options: ["Jumlah orang yang melihat iklan", "Tindakan audiens yang sesuai dengan tujuan bisnis (misal: membeli, mendaftar)", "Proses pembuatan iklan", "Perubahan warna desain logo"], ans: 1 },
+        { q: "Kombinasi antara pemasaran konvensional dan digital sering disebut pendekatan...", options: ["Tradisional", "Single-channel", "Omnichannel", "Zero-channel"], ans: 2 },
+        { q: "Copywriting dalam pemasaran adalah...", options: ["Menjiplak karya orang lain", "Teknik penulisan kata-kata persuasif untuk mendorong tindakan", "Mendesain gambar visual", "Memprogram sebuah website"], ans: 1 },
+        { q: "Apa itu Content Marketing?", options: ["Pemasaran dengan cara memberikan konten bernilai, relevan, dan konsisten untuk menarik audiens", "Pemasaran yang memaksa pelanggan membeli saat itu juga", "Pemasaran lewat telepon saja", "Penjualan langsung door-to-door"], ans: 0 },
+        { q: "Dalam pemasaran konvensional, penempatan iklan di majalah harus mempertimbangkan...", options: ["Algoritma Google", "Sirkulasi majalah dan profil pembacanya", "Jumlah follower majalah", "Click-through rate (CTR)"], ans: 1 },
+        { q: "Metrik Engagement Rate di media sosial diukur berdasarkan...", options: ["Jumlah karyawan perusahaan", "Interaksi seperti like, comment, dan share berbanding jumlah pengikut/jangkauan", "Jumlah produk yang diproduksi", "Waktu pembuatan akun"], ans: 1 },
+        { q: "Apa fungsi dari Call to Action (CTA)?", options: ["Mengakhiri iklan", "Mengajak atau mengarahkan audiens untuk melakukan tindakan tertentu (misal: 'Beli Sekarang')", "Membuat desain menjadi lebih berwarna", "Menurunkan harga barang"], ans: 1 },
+        { q: "Endorsement dalam pemasaran digital biasanya memanfaatkan...", options: ["Agen koran", "Influencer atau tokoh publik di media sosial", "Staf administrasi perusahaan", "Programmer sistem"], ans: 1 },
+        { q: "Keuntungan utama menggunakan Google My Business (Google Bisnisku) adalah...", options: ["Menjual produk fisik langsung ke Google", "Membuat bisnis mudah ditemukan secara lokal di Google Maps dan Search", "Menjadi sosial media pesaing Facebook", "Menghapus ulasan buruk secara otomatis"], ans: 1 },
+        { q: "Sponsorship pada acara TV adalah bentuk pemasaran...", options: ["Digital Outbound", "Konvensional", "Inbound Marketing", "Affiliate"], ans: 1 },
+        { q: "Strategi pemasaran dengan cara memberikan komisi kepada pihak lain yang berhasil menjual produk kita disebut...", options: ["Network Marketing", "Affiliate Marketing", "Direct Selling", "Retail Marketing"], ans: 1 },
+        { q: "Apa bedanya Inbound dan Outbound marketing?", options: ["Inbound menarik pelanggan datang (seperti konten/SEO), Outbound mendatangi pelanggan (seperti telemarketing/iklan TV)", "Tidak ada bedanya", "Inbound selalu offline, Outbound selalu online", "Inbound adalah penjualan langsung, Outbound adalah reseller"], ans: 0 },
+        { q: "Guerilla Marketing (Pemasaran Gerilya) bertujuan untuk...", options: ["Mempromosikan senjata", "Menarik perhatian audiens dengan cara yang unik, mengejutkan, dan berbiaya rendah", "Memasang baliho termahal di kota", "Memblokir internet pesaing"], ans: 1 },
+        { q: "Kelemahan pemasaran email adalah risiko pesan masuk ke kotak...", options: ["Spam", "Inbox utama", "Draft", "Sent items"], ans: 0 },
+        { q: "Untuk produk B2B (Business to Business), platform digital yang paling profesional dan disarankan adalah...", options: ["TikTok", "Instagram", "LinkedIn", "Snapchat"], ans: 2 },
+        { q: "Metode A/B Testing dalam digital marketing digunakan untuk...", options: ["Menguji produk secara fisik", "Membandingkan dua variasi kampanye untuk melihat mana yang performanya lebih baik", "Membuat dua perusahaan baru", "Menulis dua buku pemasaran"], ans: 1 },
+        { q: "Papan reklame digital (Videotron) di jalan raya termasuk kategori pemasaran...", options: ["100% Online", "Digital Out of Home (DOOH) / Konvensional Modern", "Email marketing", "SEO"], ans: 1 },
+        { q: "Jika budget perusahaan sangat terbatas namun ingin menjangkau anak muda secara luas, strategi paling rasional adalah...", options: ["Iklan di koran nasional", "Sponsor acara olahraga di TV", "Membuat konten organik yang kreatif di TikTok/Instagram Reels", "Mencetak 10.000 brosur tebal"], ans: 2 },
+        
+        // Level Sulit / Analisis (36-50)
+        { q: "ROI (Return on Investment) dalam pemasaran digital dihitung dengan cara...", options: ["(Total Penjualan - Biaya Pemasaran) / Biaya Pemasaran x 100%", "Jumlah Likes / Jumlah Followers", "Biaya Iklan / Jumlah Klik", "Total Modal + Keuntungan"], ans: 0 },
+        { q: "Cost Per Acquisition (CPA) mengukur...", options: ["Biaya untuk mendapatkan satu orang yang melihat iklan", "Biaya riil yang dikeluarkan untuk mendapatkan satu pelanggan baru yang melakukan konversi/pembelian", "Gaji karyawan tim marketing", "Harga pokok produksi barang"], ans: 1 },
+        { q: "Retargeting atau Remarketing adalah teknik...", options: ["Mengganti nama brand sepenuhnya", "Menampilkan iklan digital kembali kepada pengguna yang sebelumnya pernah berinteraksi dengan website/produk kita", "Menjual produk ke pasar internasional", "Mencetak ulang brosur dengan desain baru"], ans: 1 },
+        { q: "Sebuah perusahaan sepatu mengubah kemasan kotaknya menjadi menarik agar pelanggan secara sukarela memfotonya dan mengunggahnya di Instagram. Ini merupakan strategi integrasi antara...", options: ["Desain Produk/Konvensional dan User Generated Content (Digital)", "Telemarketing dan SEO", "PPC dan Event Sponsorship", "Direct Mail dan Radio"], ans: 0 },
+        { q: "Apa fungsi dari Facebook/Meta Pixel pada website?", options: ["Memperbaiki resolusi gambar website", "Merekam jejak pengunjung untuk pelacakan konversi dan optimasi iklan", "Mendesain logo Meta", "Menghapus spam komentar"], ans: 1 },
+        { q: "Manakah metrik yang paling tepat untuk mengukur keberhasilan kampanye 'Brand Awareness' di platform digital?", options: ["Jumlah penjualan (Sales)", "Reach (Jangkauan) dan Impressions (Tayangan)", "Cost Per Click (CPC)", "Return on Ad Spend (ROAS)"], ans: 1 },
+        { q: "Dalam analisis SEO, apa yang dimaksud dengan 'Bounce Rate'?", options: ["Persentase email yang gagal terkirim", "Persentase pengunjung yang masuk ke website lalu langsung pergi tanpa membuka halaman lain", "Jumlah klik palsu pada iklan", "Kecepatan loading sebuah halaman web"], ans: 1 },
+        { q: "Anda memiliki bisnis lokal klinik gigi. Agar mudah dicari warga sekitar melalui mesin pencari, teknik SEO spesifik apa yang digunakan?", options: ["Local SEO (Optimasi kata kunci lokal & Google My Business)", "Global SEO (Optimasi bahasa Inggris)", "Black Hat SEO", "Email blast nasional"], ans: 0 },
+        { q: "Mengapa penting mengukur Customer Acquisition Cost (CAC) vs Customer Lifetime Value (CLV)?", options: ["Agar desain website terlihat elegan", "Untuk memastikan biaya mencari pelanggan baru lebih kecil daripada total keuntungan yang diberikan pelanggan tersebut selama ia berlangganan", "Untuk menentukan jam tayang iklan TV", "Hanya sebagai laporan ke dinas pajak"], ans: 1 },
+        { q: "Sebuah baliho menyertakan QR Code yang mengarah ke halaman promo khusus di website. Ini adalah contoh...", options: ["Menghilangkan pemasaran digital", "Kanibalisme pemasaran", "Menjembatani pemasaran konvensional menuju pelacakan digital", "Kesalahan penempatan media"], ans: 2 },
+        { q: "Apa yang membedakan 'Native Advertising' dengan 'Display Banner Ads'?", options: ["Native ads terlihat seperti konten artikel/editorial biasa di platform tersebut, banner ads secara eksplisit berbentuk kotak iklan visual", "Banner ads gratis, native ads berbayar", "Tidak ada bedanya, hanya beda istilah", "Native ads hanya bisa di koran fisik"], ans: 0 },
+        { q: "Program 'Loyalty Card' fisik berupa stempel yang diubah menjadi aplikasi poin di smartphone menunjukkan...", options: ["Kemunduran strategi promosi", "Transformasi digital dari retensi pelanggan konvensional", "Pemborosan anggaran IT", "Sistem yang mempersulit pelanggan"], ans: 1 },
+        { q: "Apa risiko utama menggunakan taktik 'Black Hat SEO' untuk meningkatkan peringkat website?", options: ["Biaya yang sangat mahal", "Website dapat terkena penalti dan dihapus dari indeks mesin pencari (Google)", "Desain website akan rusak", "Hanya akan menarik pengguna dari luar negeri"], ans: 1 },
+        { q: "Analisis PESTLE biasanya digunakan untuk...", options: ["Mengedit video untuk Instagram", "Menganalisis faktor eksternal (Politik, Ekonomi, Sosial, Teknologi, Hukum, Lingkungan) sebelum meluncurkan strategi pemasaran besar", "Menghitung jumlah karakter di Twitter", "Mencari alamat email prospek"], ans: 1 },
+        { q: "Dalam funnel pemasaran konvensional maupun digital, tahap AIDA terdiri dari...", options: ["Action, Interaction, Direction, Activation", "Awareness, Interest, Desire, Action", "Always, Into, Data, Analytics", "Attention, Internet, Digital, Ads"], ans: 1 }
+    ];
+
+    // Variabel state kuis
+    let currentQuestion = 0;
+    let userAnswers = new Array(quizData.length).fill(null);
+    let isQuizActive = false;
+    let userData = { name: "", absen: "", kelas: "" };
+
+    // --- FUNGSI NAVIGASI LAYAR ---
+    function showScreen(screenId) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(screenId).classList.add('active');
+    }
+
+    // --- MEMULAI KUIS ---
+    function startQuiz(e) {
+        e.preventDefault();
+        
+        userData.absen = document.getElementById('no_absen').value;
+        userData.name = document.getElementById('nama').value;
+        userData.kelas = document.getElementById('kelas').value;
+
+        isQuizActive = true;
+        requestWakeLock(); // Aktifkan anti layar mati
+        
+        showScreen('quiz-screen');
+        renderQuestion();
+    }
+
+    // --- DETEKSI KECURANGAN (TAB PINDAH) ---
+    document.addEventListener("visibilitychange", function() {
+        // Jika sedang ujian dan tab disembunyikan/pindah aplikasi
+        if (document.visibilityState === 'hidden' && isQuizActive) {
+            alert("PELANGGARAN: Anda terdeteksi keluar dari halaman kuis/berpindah aplikasi!\n\nKuis otomatis dihentikan dan nilai saat ini akan langsung dikirim.");
+            isQuizActive = false; // Mencegah trigger berulang
+            submitQuiz(); // Kirim secara paksa
+        }
+    });
+
+    // --- RENDER SOAL ---
+    function renderQuestion() {
+        const qData = quizData[currentQuestion];
+        
+        document.getElementById('q-counter').innerText = `Soal ${currentQuestion + 1} / ${quizData.length}`;
+        document.getElementById('question-text').innerText = qData.q;
+        
+        const optionsList = document.getElementById('options-list');
+        optionsList.innerHTML = '';
+
+        qData.options.forEach((opt, index) => {
+            const btn = document.createElement('div');
+            btn.className = 'option-item';
+            // Tandai jika sudah pernah dipilih
+            if (userAnswers[currentQuestion] === index) {
+                btn.classList.add('selected');
+            }
+            btn.innerText = String.fromCharCode(65 + index) + ". " + opt;
+            btn.onclick = () => selectOption(index);
+            optionsList.appendChild(btn);
+        });
+
+        // Atur tombol prev & next
+        document.getElementById('btn-prev').disabled = currentQuestion === 0;
+        
+        const btnNext = document.getElementById('btn-next');
+        if (currentQuestion === quizData.length - 1) {
+            btnNext.innerText = 'Selesai & Kirim';
+            btnNext.style.backgroundColor = 'var(--success)';
+        } else {
+            btnNext.innerText = 'Selanjutnya';
+            btnNext.style.backgroundColor = 'var(--primary)';
+        }
+    }
+
+    // --- PILIH JAWABAN ---
+    function selectOption(index) {
+        userAnswers[currentQuestion] = index;
+        renderQuestion(); // Re-render untuk efek visual selected
+    }
+
+    // --- NAVIGASI SOAL ---
+    function prevQuestion() {
+        if (currentQuestion > 0) {
+            currentQuestion--;
+            renderQuestion();
+        }
+    }
+
+    function nextQuestion() {
+        // Harus jawab dulu sebelum next
+        if (userAnswers[currentQuestion] === null) {
+            alert('Silakan pilih salah satu jawaban sebelum melanjutkan!');
+            return;
+        }
+
+        if (currentQuestion < quizData.length - 1) {
+            currentQuestion++;
+            renderQuestion();
+        } else {
+            // Jika ini soal terakhir
+            if (confirm("Apakah Anda yakin telah selesai dan ingin mengirim jawaban?")) {
+                isQuizActive = false; // Akhiri pengawasan cheat sementara loading
+                submitQuiz();
+            }
+        }
+    }
+
+    // --- MENGHITUNG SKOR & KIRIM KE GOOGLE SCRIPT ---
+    function submitQuiz() {
+        showScreen('loading-screen');
+        releaseWakeLock(); // Lepaskan wake lock karena kuis selesai
+
+        let score = 0;
+        for (let i = 0; i < quizData.length; i++) {
+            if (userAnswers[i] === quizData[i].ans) {
+                score++;
+            }
+        }
+
+        const totalQuestions = quizData.length;
+        
+        // PAYLOAD WAJIB Sesuai Persyaratan di Prompt
+        const payload = {
+            "quizTitle": "Kuis Strategi Pemasaran Konvensional dan Digital",
+            "name": userData.name + " (" + userData.absen + ")", // Menyelipkan absen di nama agar terdata
+            "kelas": userData.kelas,
+            "score": score,
+            "totalQuestions": totalQuestions
+        };
+
+        // Kirim menggunakan Fetch API POST mode no-cors
+        fetch(GOOGLE_SCRIPT_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        })
+        .then(() => {
+            // Karena no-cors, response tidak bisa dibaca isinya (opaque). 
+            // Namun jika sampai di blok 'then', berarti request berhasil terkirim.
+            showResult(score, totalQuestions, true);
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showResult(score, totalQuestions, false);
+        });
+    }
+
+    // --- TAMPILKAN HASIL AKHIR ---
+    function showResult(score, total, isSuccess) {
+        showScreen('result-screen');
+        
+        const finalGrade = Math.round((score / total) * 100);
+        document.getElementById('final-score').innerText = finalGrade;
+        document.getElementById('correct-count').innerText = score;
+
+        const msgEl = document.getElementById('result-message');
+        if (isSuccess) {
+            msgEl.innerText = "Terima kasih, data jawaban Anda berhasil dikirim ke server dan tercatat.";
+            msgEl.style.color = "var(--success)";
+        } else {
+            msgEl.innerText = "Jawaban dievaluasi, tetapi ada masalah pada koneksi saat mengirim data. Silakan lapor ke admin.";
+            msgEl.style.color = "var(--danger)";
+        }
+    }
+</script>
+
+</body>
+</html>
